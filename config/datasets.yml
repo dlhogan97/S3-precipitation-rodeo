@@ -1,0 +1,45 @@
+# Register datasets here. Each entry defines where raw files live, how to load them,
+# native units, time zone, and optional variables map for standardization.
+# Use dataset keys in scripts to fetch paths and load consistently.
+
+# Example point station dataset
+snodgrass_open:
+  type: point
+  raw_path: data/raw/snodgrass/SND_opn_AWS_data_001hr.csv
+  meta_path: data/raw/snodgrass/SND_opn_AWS_data_meta.txt
+  timezone: MST
+  crs: EPSG:4326
+  loader: snodgrass_csv
+  variables:
+    precip_rate: {name: "precip (mm/hr)", units: mm/hr}
+    temperature: {name: "T (C)", units: degC}
+
+# Example gridded product
+gpm_imerg:
+  type: grid
+  raw_glob: data/raw/gpm_imerg/*.nc
+  timezone: UTC
+  crs: EPSG:4326
+  loader: xarray_nc
+  time_name: time
+  lat_name: lat
+  lon_name: lon
+  variables:
+    precip_rate: {name: precipitationCal, units: mm/hr}
+
+# Example model output
+wrf_out:
+  type: model
+  raw_glob: data/raw/wrf/*wrfout*.nc
+  timezone: UTC
+  crs: EPSG:4326
+  loader: xarray_nc
+  time_name: Time
+  lat_name: XLAT
+  lon_name: XLONG
+  variables:
+    precip_rate: {name: RAINNC, units: mm}
+    # Provide accumulation semantics for conversion to rate
+    precip_is_accum: true
+    precip_accum_units: mm
+    timestep_seconds: 3600
