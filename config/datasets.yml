@@ -5,8 +5,8 @@
 # Example point station dataset
 snodgrass_open:
   type: point
-  raw_path: data/raw/snodgrass/SND_opn_AWS_data_001hr.csv
-  meta_path: data/raw/snodgrass/SND_opn_AWS_data_meta.txt
+  raw_path: /storage/dlhogan/precipitation-rodeo/data/raw/snodgrass/SND_opn_AWS_data_001hr.csv
+  meta_path: /storage/dlhogan/precipitation-rodeo/data/raw/snodgrass/SND_opn_AWS_data_meta.txt
   timezone: MST
   crs: EPSG:4326
   loader: snodgrass_csv
@@ -17,7 +17,7 @@ snodgrass_open:
 # Example gridded product
 gpm_imerg:
   type: grid
-  raw_glob: data/raw/gpm_imerg/*.nc
+  raw_glob: /storage/dlhogan/precipitation-rodeo/data/raw/gpm_imerg/*.nc
   timezone: UTC
   crs: EPSG:4326
   loader: xarray_nc
@@ -28,18 +28,6 @@ gpm_imerg:
     precip_rate: {name: precipitationCal, units: mm/hr}
 
 # Example model output
-wrf_out:
-  type: model
-  raw_glob: data/raw/wrf/*wrfout*.nc
-  timezone: UTC
-  crs: EPSG:4326
-  loader: xarray_nc
-  time_name: Time
-  lat_name: XLAT
-  lon_name: XLONG
-  variables:
-    precip_rate: {name: RAINNC, units: mm}
-    # Provide accumulation semantics for conversion to rate
-    precip_is_accum: true
-    precip_accum_units: mm
-    timestep_seconds: 3600
+sail_precip:
+  type: observation
+  

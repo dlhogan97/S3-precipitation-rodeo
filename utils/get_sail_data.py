@@ -61,7 +61,6 @@ def date_parser(date_string, output_format='%Y%m%d', return_datetime=False):
     fmt_strings = ', '.join(date_fmts)
     raise ValueError('Invalid Date format, please use one of these formats ' + fmt_strings)
 
-
 def get_sail_data(username, token, datastream, startdate, enddate, time=None, resample=None):
     """
     *** This tool was adapted from the ARM Atmospheric Data Community Toolkit ***

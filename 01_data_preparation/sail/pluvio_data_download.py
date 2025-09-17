@@ -18,7 +18,7 @@ api_token = credentials.get('token')
 
 # Datastream to download
 sail_datastream_dict = {
-    "squire_radar": "gucxprecipradarsquireS2.c1",
+    "pluvio": "gucwbpluvio2M1.a1",
 }
 
 # data time series
@@ -60,8 +60,8 @@ for i, date in enumerate(date_range):
             print('-------------------')
             continue
         else:
-            # resample to 30min mean
-            ds = ds.resample(time='30min').mean()
+            # resample to 1H mean
+            ds = ds.resample(time='1H').mean()
             # drop lowest_height variable
             ds = ds.drop_vars('lowest_height')
             # save the dataset
