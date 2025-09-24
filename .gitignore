@@ -233,3 +233,4 @@ cython_debug/
 01_data_preparation/sail/sail_ds_1H_met_kp_2023.nc
 01_data_preparation/sail/sail_ld_gothic_2022_precip_binary.csv
 01_data_preparation/sail/sail_ld_gothic_2023_precip_binary.csv
+*.nc

@@ -1,0 +1,21 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Site": "Avery Picnic", "Instrument": "ASFS", "Latitude": 38.9726247, "Longitude": -106.9971697 }, "geometry": { "type": "Point", "coordinates": [ -106.9971697, 38.9726247 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "ARL SEB solar", "Latitude": 38.942089072000002, "Longitude": -106.973550206 }, "geometry": { "type": "Point", "coordinates": [ -106.973550206, 38.942089072 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "ARL SEB tower", "Latitude": 38.942117374, "Longitude": -106.973451975 }, "geometry": { "type": "Point", "coordinates": [ -106.973451975, 38.942117374 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "GML table", "Latitude": 38.941855855, "Longitude": -106.973087209 }, "geometry": { "type": "Point", "coordinates": [ -106.973087209, 38.941855855 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "GML ceilometer", "Latitude": 38.941848792000002, "Longitude": -106.972957826 }, "geometry": { "type": "Point", "coordinates": [ -106.972957826, 38.941848792 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "GML tower", "Latitude": 38.941722366, "Longitude": -106.973096981 }, "geometry": { "type": "Point", "coordinates": [ -106.973096981, 38.941722366 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "PSL SLR", "Latitude": 38.941977449, "Longitude": -106.972999104 }, "geometry": { "type": "Point", "coordinates": [ -106.972999104, 38.941977449 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds", "Instrument": "power drop", "Latitude": 38.941703842000003, "Longitude": -106.97338012199999 }, "geometry": { "type": "Point", "coordinates": [ -106.973380122, 38.941703842 ] } },
+{ "type": "Feature", "properties": { "Site": "Kettle Ponds Annex", "Instrument": "ASFS", "Latitude": 38.939392294000001, "Longitude": -106.969857303 }, "geometry": { "type": "Point", "coordinates": [ -106.969857303, 38.939392294 ] } },
+{ "type": "Feature", "properties": { "Site": "Brush Creek", "Instrument": "ARL SEB solar", "Latitude": 38.859610971000002, "Longitude": -106.920538197 }, "geometry": { "type": "Point", "coordinates": [ -106.920538197, 38.859610971 ] } },
+{ "type": "Feature", "properties": { "Site": "Brush Creek", "Instrument": "ARL SEB tower", "Latitude": 38.859523191000001, "Longitude": -106.92047859100001 }, "geometry": { "type": "Point", "coordinates": [ -106.920478591, 38.859523191 ] } },
+{ "type": "Feature", "properties": { "Site": "Brush Creek", "Instrument": "GML tracker", "Latitude": 38.859074366000002, "Longitude": -106.92090364400001 }, "geometry": { "type": "Point", "coordinates": [ -106.920903644, 38.859074366 ] } },
+{ "type": "Feature", "properties": { "Site": "Brush Creek", "Instrument": "GML table", "Latitude": 38.859127743999998, "Longitude": -106.920904658 }, "geometry": { "type": "Point", "coordinates": [ -106.920904658, 38.859127744 ] } },
+{ "type": "Feature", "properties": { "Site": "Brush Creek", "Instrument": "GML tower", "Latitude": 38.859386047000001, "Longitude": -106.920922277 }, "geometry": { "type": "Point", "coordinates": [ -106.920922277, 38.859386047 ] } },
+{ "type": "Feature", "properties": { "Site": "Brush Creek", "Instrument": "PSL SLR", "Latitude": 38.8588513, "Longitude": -106.9210944 }, "geometry": { "type": "Point", "coordinates": [ -106.9210944, 38.8588513 ] } }
+]
+}

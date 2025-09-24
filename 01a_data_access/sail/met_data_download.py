@@ -1,8 +1,11 @@
+import os
+# set working directory
+os.chdir('/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo/')
+print(f"Set working directory to {os.getcwd()}")
 import xarray as xr
 import pandas as pd
 from utils.get_sail_data import get_sail_data
 import json
-import os
 
 # Function to load ARM credentials
 def load_arm_credentials(credential_path):
@@ -10,23 +13,27 @@ def load_arm_credentials(credential_path):
         credentials = json.load(f)
     return credentials
 # Location of ARM credentials
-credential_path = '/home/dlhogan/.act_config.json'
+credential_path = '/home/dlhogan/tokens/.act_config.json' # CHANGE THIS TO YOUR LOCATION
 credentials = load_arm_credentials(credential_path)
 # api token and username for ARM
 api_username = credentials.get('username')
 api_token = credentials.get('token')
+print("Loaded ARM credentials")
 
 # Datastream to download
 sail_datastream_dict = {
-    "aos_mtcb": "gucaosmetS2.a1",
-    "aos_gothic": "gucaosmetM1.a1",
+    "met": "gucmetM1.b1",
 }
 
 # data time series
-date_range = pd.date_range(start='2021-09-01', end='2023-06-16', freq='5D')
+date_range = pd.date_range(start='2021-09-01', 
+                           end='2023-06-16', 
+                           freq='5D') # CHANGE THIS IF DESIRED
+print(f"Set date range to {date_range[0]} to {date_range[-1]} with frequency of 5 days")
 
 # change to location of data folder on your machine
-storage_directory = f'/storage/dlhogan/precipitation-rodeo/data/raw/SAIL/'
+storage_directory = f'/storage/dlhogan/precipitation-rodeo/data/raw/SAIL/' # CHANGE THIS TO YOUR DIRECTORY
+print(f"Set storage directory to {storage_directory}")
 
 # make the directory if it doesn't exist
 for key in sail_datastream_dict.keys():
@@ -62,13 +69,7 @@ for i, date in enumerate(date_range):
                 print('-------------------')
                 continue
             else:
-                # resample to 1H mean
-                ds = ds.resample(time='1H').mean()
-                # drop lowest_height variable
-                ds = ds.drop_vars('lowest_height')
                 # save the dataset
-                ds.to_netcdf(f"{storage_directory}/{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}.nc")
-                # print that this file is completed
-            
-        print(f"File {i+1} of {len(date_range)} completed")
-    print(f"Completed {key} data download for date range {date.strftime('%Y%m%d')} to {(date + pd.Timedelta('4D')).strftime('%Y%m%d')}")
+                ds.to_netcdf(f"{storage_directory}/{key}/{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}.nc")
+            # print that this file is completed
+    print(f"File {i+1} of {len(date_range)} completed")
