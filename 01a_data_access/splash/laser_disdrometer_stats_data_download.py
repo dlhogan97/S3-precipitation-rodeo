@@ -1,16 +1,19 @@
-import os
 import glob as glob
-# %%
+import os
+import zipfile# %%
 # set the filepath
 filepath = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/'
 if not os.path.exists(filepath+'laser_disdrometer_stats_KP'):
-    print('Data not downlaoded yet. Would you like to download it?')
+    print('Data not downloaded yet. Would you like to download it?')
     download = input('y/n: ')
     if download == 'y':
+        # create laser_disdrometer_stats_KP directory
+        os.makedirs(filepath+'laser_disdrometer_stats_KP', exist_ok=True)
         # downlaod the data from https://zenodo.org/records/10372121/files/NOAA_PSL_OttDisdrometerStats_KettlePonds.zip using wget to the filepath
         os.system('wget https://zenodo.org/records/10372121/files/NOAA_PSL_OttDisdrometerStats_KettlePonds.zip -P '+filepath)
         # unzip the file
-        os.system('unzip '+filepath+'NOAA_PSL_OttDisdrometerStats_KettlePonds.zip -d '+filepath)
+        with zipfile.ZipFile(filepath+'NOAA_PSL_OttDisdrometerStats_KettlePonds.zip', 'r') as zip_ref:
+            zip_ref.extractall(filepath+'laser_disdrometer_stats_KP')
         # remove the zip file
         os.system('rm '+filepath+'NOAA_PSL_OttDisdrometerStats_KettlePonds.zip')
     else:

@@ -1,13 +1,7 @@
 # %%
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import xarray as xr
 import glob as glob
 import os
-from dask.distributed import LocalCluster, Client
-import dask.dataframe as dd
-import datetime as dt
+import zipfile
 
 # %% [markdown]
 # # Clean SPLASH Laser Disdrometer data
@@ -16,13 +10,16 @@ import datetime as dt
 # set the filepath
 filepath = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/'
 if not os.path.exists(filepath+'laser_disdrometer_raw_KP'):
-    print('Data not downlaoded yet. Would you like to download it?')
+    print('Data not downloaded yet. Would you like to download it?')
     download = input('y/n: ')
     if download == 'y':
+        # create laser_disdrometer_raw_KP directory
+        os.makedirs(filepath+'laser_disdrometer_raw_KP', exist_ok=True)
         # downlaod the data from https://zenodo.org/records/10368926/files/NOAA_PSL_OttDisdrometerRaw_KettlePonds.zip using wget to the filepath
         os.system('wget https://zenodo.org/records/10368926/files/NOAA_PSL_OttDisdrometerRaw_KettlePonds.zip -P '+filepath)
         # unzip the file
-        os.system('unzip '+filepath+'NOAA_PSL_OttDisdrometerRaw_KettlePonds.zip -d '+filepath)
+        with zipfile.ZipFile(filepath+'NOAA_PSL_OttDisdrometerRaw_KettlePonds.zip', 'r') as zip_ref:
+            zip_ref.extractall(filepath+'laser_disdrometer_raw_KP')
         # remove the zip file
         os.system('rm '+filepath+'NOAA_PSL_OttDisdrometerRaw_KettlePonds.zip')
     else:
