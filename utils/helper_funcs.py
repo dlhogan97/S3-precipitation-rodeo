@@ -402,3 +402,25 @@ def localize_time(data, current_time_zone='UTC', local_time_zone='MST'):
     else:
         raise ValueError('Data must be either an xarray dataset or a pandas dataframe')
     return data
+
+def convert_to_local_time(ds, time_variable='time', local_tz='America/Denver'):
+    import pytz
+    """
+    This function takes in an xarray dataset and converts the time to the local timezone
+    Inputs:
+        ds: xarray dataset
+        local_tz: string of the local timezone, default is 'America/Denver'
+    Outputs:
+        ds: xarray dataset with the time converted to the local timezone        
+    """
+    # assign time as UTC timezone
+    time_index = ds[time_variable].to_index()
+    time_utc = time_index.tz_localize(pytz.UTC)
+
+    # convert to local timezone
+    time_local = time_utc.tz_convert(local_tz)
+
+    ds = ds.assign_coords(time=time_local)
+    ds[time_variable].attrs['time_zone'] = local_tz
+
+    return ds

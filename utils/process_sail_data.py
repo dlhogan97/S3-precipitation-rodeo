@@ -11,7 +11,8 @@ SAIL_HUMIDITY_VARS = {
 }
 
 SAIL_WIND_VARS = {
-    "mean":["wspd_arith_mean", "wind_dir_mean", "wspd_vec_mean", "wdir_vec_mean", "wind_speed", "wind_direction"],
+    "mean":["wspd_arith_mean", "wspd_vec_mean", "wind_speed", "u", "v"],
+    "mode": ["wind_dir_mean", "wdir_vec_mean", "wind_direction"],
     "std":["wdir_vec_std"],
     "qc":["qc_wspd_arith_mean", "qc_wind_dir_mean", "qc_wspd_vec_mean", "qc_wdir_vec_mean"],
 }
