@@ -3,30 +3,22 @@ Generated with the help of ChatGPT 4.0 at OpenAI. Link to prompts: https://chatg
 """
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import xarray as xr
 import glob as glob
 import os
-from dask.distributed import LocalCluster, Client
-import dask.dataframe as dd
 import datetime as dt
 
-os.chdir("/home/dlhogan/S3-precipitation-rodeo/")
+os.chdir("/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo/")
 
-filepath = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/'
-if not os.path.exists(filepath+'laser_disdrometer_raw_KP'):
-    print('Data not downlaoded yet. Would you like to download the raw data?')
-    download = input('y/n: ')
-    if download == 'y':
-        # run the laser_disdrometer_data_download script
-        os.system('python ./01a_data_access/splash/laser_disdrometer_data_download.py')
-    else:
-        print('Download the data from https://zenodo.org/records/10368926/files/NOAA_PSL_OttDisdrometerRaw_KettlePonds.zip')
+original_storage_path = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/'
+final_storage_path = '/storage/dlhogan/precipitation-rodeo/data/processed/SPLASH/'
+if not os.path.exists(original_storage_path+'laser_disdrometer_raw_KP'):
+    print("Download data using ~/01a_data_access/splash/laser_disdrometer_raw_data_download.py")
 else:
     print('Data already downloaded')
     # we'll start by loading in one file and looking at the data
-    filepath = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/laser_disdrometer_raw_KP/*'
-    files = glob.glob(filepath)
+    original_storage_path = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/laser_disdrometer_raw_KP/*'
+    files = glob.glob(original_storage_path)
 
 def process_laser_disdrometer_file(file_path):
     """
@@ -311,7 +303,7 @@ for file in files:
     try:
         ds = process_laser_disdrometer_file(file)
         # resample to 5-minutes
-        # ds = resample_xarray_dataset(ds, '5min')
+        # ds = resample_xarray_dataset(ds, '30min')
         ds_list.append(ds)
     except Exception as e:
         print(f"Error processing file {file}: {e}")
@@ -323,18 +315,18 @@ combined_ds = xr.concat(ds_list, dim="time")
 combined_ds = combined_ds.sortby("time")
 
 # %%
-# calculate the 5minute resampled mean of the data by first
+# calculate the 30minute resampled mean of the data by first
 # saving all the variable and dataset attributes and then converting to pands to resample
 # converting back to xarray and adding the attributes back
-# resampled_5min mean
-resampled_5min_ds = resample_xarray_dataset(combined_ds, '5min')
+# resampled_30min mean
+resampled_30min_ds = resample_xarray_dataset(combined_ds, '30min')
 
 # %%
 # save the dataset to a netcdf file
 output = True
 if output:
-    resampled_5min_ds.to_netcdf('./01_data/processed_data/splash/SPLASH_kp_laser_disdrometer_5min.nc')
+    resampled_30min_ds.to_netcdf(f'{final_storage_path}/SPLASH_kp_laser_disdrometer_30min.nc')
 
 # %%
 # close all open datasets
-resampled_5min_ds.close()
+resampled_30min_ds.close()
