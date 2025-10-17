@@ -361,7 +361,12 @@ def adjust_wdir(df):
 
 VARIABLES = ['atmos_pressure','temp_mean', 'rh_mean','vapor_pressure_mean','wspd_arith_mean','wdir_vec_mean']
 VARIABLES_KP = ['mean_u','mean_v','mean_t','mean_q','atm_pres','wind_spd','wind_dir','lv']
-def qc_sail_met(ds, variables, temp_var, rh_var, wspd_var, vapor_pressure_var):
+def qc_sail_met(ds, 
+                variables, 
+                temp_var, 
+                rh_var, 
+                wspd_var, 
+                vapor_pressure_var):
     # first let's add qc to all the variables as a new list
     qc_variables = ['qc_'+v for v in variables]
     ds_qc = ds[variables+qc_variables]
@@ -424,3 +429,23 @@ def convert_to_local_time(ds, time_variable='time', local_tz='America/Denver'):
     ds[time_variable].attrs['time_zone'] = local_tz
 
     return ds
+
+def calculate_wind_components(wind_speed, wind_direction):
+    """
+    Calculate the u and v components of wind from wind speed and direction.
+
+    Parameters:
+    wind_speed (float or np.ndarray): Wind speed in m/s.
+    wind_direction (float or np.ndarray): Wind direction in degrees from north.
+
+    Returns:
+    tuple: A tuple containing the u and v components of the wind.
+    """
+    # Convert wind direction from degrees to radians
+    wind_direction_rad = np.radians(wind_direction)
+
+    # Calculate u and v components
+    u = -wind_speed * np.sin(wind_direction_rad)  # East-West component
+    v = -wind_speed * np.cos(wind_direction_rad)  # North-South component
+
+    return u.data, v.data

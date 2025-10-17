@@ -32,6 +32,7 @@ SAIL_PRESSURE_VARS = {
 import xarray as xr
 import geopandas as gpd
 from shapely.geometry import Point
+from utils.helper_funcs import convert_to_local_time
 
 def get_sail_point_info(ds):
     """Extract the latitude, longitude, and elevation from the SAIL dataset.
@@ -79,3 +80,26 @@ def merge_sail_datasets(filepath):
         ds.close()
     ds = xr.concat(dataset_list, dim="time")
     return ds
+
+def initial_sail_processing(file, vars_to_keep):
+    ds = xr.open_dataset(file)
+    ### 2. subset to only the variables we want
+    for var in vars_to_keep:
+        if "qc_" + var in ds.data_vars:
+            vars_to_keep.append("qc_" + var)
+    ds_sub = ds[vars_to_keep]
+    # convert to local time
+    try:
+        ds_sub = convert_to_local_time(ds_sub, local_tz='America/Denver')
+    except Exception as e:
+        print(f"Error converting to local time: {e}")
+    # close the original dataset
+    ds.close()
+
+    ### 3. filter out any bad data
+    for var in ds_sub.data_vars:
+        if 'qc' in var:
+            data_var = var.replace('qc_', '')
+            # drop replace values with NaN where qc is not 0
+            ds_sub[data_var] = ds_sub[data_var].where(ds_sub[var] == 0)
+    return ds_sub

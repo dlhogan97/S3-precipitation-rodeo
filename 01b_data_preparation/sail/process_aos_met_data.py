@@ -180,7 +180,7 @@ if __name__ == "__main__":
     # sort by time
     ds_all = ds_all.sortby('time')
     # save to a new netcdf file
-    output_filepath = f"{data_dir}/processed/SAIL/aos_{SITE_NAME}_met_30min.nc"
+    output_filepath = f"{data_dir}/processed/SAIL/aos_{SITE_NAME}_met_{RESAMPLE_INTERVAL}.nc"
     print(f"Saving processed data to {output_filepath}")
     ds_all.to_netcdf(output_filepath)
     if len(erroneous_files) > 0:
