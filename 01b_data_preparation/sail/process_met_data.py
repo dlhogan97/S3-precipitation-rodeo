@@ -126,6 +126,7 @@ def process_met_data(file, vars_to_keep, resample_interval='30min'):
         lon_da,
         alt_da
     ])
+    ds.close()
     return ds_merged
 
 
