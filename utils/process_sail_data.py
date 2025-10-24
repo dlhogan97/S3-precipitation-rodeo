@@ -34,34 +34,6 @@ import geopandas as gpd
 from shapely.geometry import Point
 from utils.helper_funcs import convert_to_local_time
 
-def get_sail_point_info(ds):
-    """Extract the latitude, longitude, and elevation from the SAIL dataset.
-
-    Args:
-        ds (xarray.Dataset): The input SAIL dataset.
-
-    Returns:
-        geopandas.GeoDataFrame: A GeoDataFrame containing the point information.
-    """
-    # save the merged dataset to a new NetCDF file
-    lat = ds["lat"].values[0]
-    lon = ds["lon"].values[0]
-    elev = ds["alt"].values[0]
-
-    # Create a GeoDataFrame and name after dataset.attrs['datastream']
-
-    gdf = gpd.GeoDataFrame(
-        {
-            "datastream": [ds.attrs.get("datastream", "unknown")],
-            "latitude": [lat],
-            "longitude": [lon],
-            "elevation": [elev],
-        },
-        geometry=[Point(lon, lat, elev)],
-        crs="EPSG:4326",
-    )
-    return gdf
-
 def merge_sail_datasets(filepath):
     """Merge multiple SAIL datasets along the time dimension.
 
