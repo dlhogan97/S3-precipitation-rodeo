@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from metpy.plots import SkewT, add_metpy_logo
 from metpy.units import units
 import metpy.calc as mcalc
+import geopandas as gpd
+from shapely.geometry import Point
 
 WIND_VARIABLES = [
 # Sonic Anemometer Data for 4 towers
@@ -113,7 +115,8 @@ SNOW_FLUX = [
     # Blowing snow/FlowCapt Sensors
     'SF_avg_1m_ue', 'SF_avg_2m_ue',
 ]
-RADIAION_VARIABLES = [
+SWE_VARIABLES = [ "SWE_p1_c", "SWE_p2_c", "SWE_p3_c", "SWE_p4_c" ]
+RADIATION_VARIABLES = [
     'Rpile_out_9m_d', 'Rpile_in_9m_d', 'Rsw_in_9m_d', 'Rsw_out_9m_d'
 ]
 # create a function to setup a dataframe for a windrose plot in plotly
@@ -449,3 +452,44 @@ def calculate_wind_components(wind_speed, wind_direction):
     v = -wind_speed * np.cos(wind_direction_rad)  # North-South component
 
     return u.data, v.data
+
+def get_point_info(ds):
+    """Extract the latitude, longitude, and elevation from a SAIL dataset.
+
+    Args:
+        ds (xarray.Dataset): The input SAIL dataset.
+
+    Returns:
+        geopandas.GeoDataFrame: A GeoDataFrame containing the point information.
+    """
+    # save the merged dataset to a new NetCDF file
+    lat_options = ['latitude', 'lat', 'Latitude', 'LATITUDE']
+    lon_options = ['longitude', 'lon', 'Longitude', 'LONGITUDE']
+    alt_options = ['elevation', 'alt', 'Elevation', 'ELEVATION', 'altitude', 'Altitude', 'ALTITUDE']
+    for lat_var in lat_options:
+        if lat_var in ds.variables:
+            lat = ds[lat_var].values[0]
+            break
+
+    for lon_var in lon_options:
+        if lon_var in ds.variables:
+            lon = ds[lon_var].values[0]
+            break
+
+    for alt_var in alt_options:
+        if alt_var in ds.variables:
+            elev = ds[alt_var].values[0]
+            break
+    # Create a GeoDataFrame and name after dataset.attrs['datastream']
+
+    gdf = gpd.GeoDataFrame(
+        {
+            "datastream": [ds.attrs.get("datastream", "unknown")],
+            "latitude": [lat],
+            "longitude": [lon],
+            "elevation": [elev],
+        },
+        geometry=[Point(lon, lat, elev)],
+        crs="EPSG:4326",
+    )
+    return gdf

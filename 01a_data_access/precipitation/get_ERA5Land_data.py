@@ -12,7 +12,7 @@ LOCAL_MIDNIGHT_IN_UTC = (0-TIME_ZONE_SHIFT_HOURS) % 24
 TIME_STEPS = ['00:00', f"{LOCAL_MIDNIGHT_IN_UTC:02d}:00"]
 
 # Define the date range for data retrieval
-DATES = ["20221001", "20230930"]  # YYYYMMDD format
+DATES = ["20211001", "20230930"]  # YYYYMMDD format
 
 # Set file path + name
 data_path = "/storage/dlhogan/precipitation-rodeo/data/external/ERA5-Land/"
@@ -45,11 +45,10 @@ if not os.path.exists(result_file):
         os.remove(result_file)
         result_file = result_file.replace(".zip", ".nc")
         # rename the file from data_0.nc to era5_land_YYYYMMDD_YYYYMMDD.nc
-        new_file_path = result_file.replace("data_0.nc", f"era5_land_{DATES[0]}_{DATES[1]}.nc")
-        os.rename(result_file, new_file_path)
-        result_file = new_file_path
-
-
+        if os.path.exists(os.path.join(os.path.dirname(result_file), "data_0.nc")):
+            new_file_path = result_file.replace("data_0.nc", f"era5_land_{DATES[0]}_{DATES[1]}.nc")
+            os.rename(os.path.join(os.path.dirname(result_file), "data_0.nc"), new_file_path)
+            result_file = new_file_path
 ds = xr.open_dataset(
     result_file
 ).load()
