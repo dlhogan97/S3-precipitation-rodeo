@@ -468,17 +468,17 @@ def get_point_info(ds):
     alt_options = ['elevation', 'alt', 'Elevation', 'ELEVATION', 'altitude', 'Altitude', 'ALTITUDE']
     for lat_var in lat_options:
         if lat_var in ds.variables:
-            lat = ds[lat_var].values[0]
+            lat = ds[lat_var].max().values
             break
 
     for lon_var in lon_options:
         if lon_var in ds.variables:
-            lon = ds[lon_var].values[0]
+            lon = ds[lon_var].max().values
             break
 
     for alt_var in alt_options:
         if alt_var in ds.variables:
-            elev = ds[alt_var].values[0]
+            elev = ds[alt_var].max().values
             break
     # Create a GeoDataFrame and name after dataset.attrs['datastream']
 

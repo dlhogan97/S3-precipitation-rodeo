@@ -51,8 +51,8 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
             ds_kettle_ponds_resampled[var].attrs = ds[var].attrs
 
         # add the total to the original dataset
-        ds_gothic_resampled = xr.concat([ds_gothic_resampled, ds_gothic_resampled_total], dim='time')
-        ds_kettle_ponds_resampled = xr.concat([ds_kettle_ponds_resampled, ds_kettle_ponds_resampled_total], dim='time')
+        ds_gothic_resampled = ds_gothic_resampled.merge(ds_gothic_resampled_total, join='left')
+        ds_kettle_ponds_resampled = ds_kettle_ponds_resampled.merge(ds_kettle_ponds_resampled_total, join='left')
         # add unit and longname attributes for total variables
         for var in ds_gothic_resampled_total.data_vars:
             ds_gothic_resampled_total[var].attrs['units'] = 'mm'
@@ -88,7 +88,14 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
     combined_ds_gothic = combined_ds_gothic.sortby('time')
     combined_ds_kettle_ponds = xr.concat(ds_list_kettle_ponds, dim='time')
     combined_ds_kettle_ponds = combined_ds_kettle_ponds.sortby('time')
-    return combined_ds_gothic, combined_ds_kettle_ponds
+
+    # add site as dimension
+    combined_ds_gothic = combined_ds_gothic.expand_dims({'site': ['gothic']})
+    combined_ds_kettle_ponds = combined_ds_kettle_ponds.expand_dims({'site': ['kettle_ponds']})
+
+    # concatenate along site dimension
+    combined_ds = xr.concat([combined_ds_gothic, combined_ds_kettle_ponds], dim='site')
+    return combined_ds
 
 if __name__ == "__main__":
 
@@ -116,11 +123,10 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error opening example Kettle Ponds example dataset: {e}. Make sure the file exists.")
 
-    combined_ds_gothic, combined_ds_kettle_ponds = process_squire_data(
+    combined_ds = process_squire_data(
         files, resample_interval=RESAMPLE_INTERVAL,
         gothic_point_info=gothic_point_info,
         kettle_ponds_point_info=kettle_ponds_point_info
     )
 
-    combined_ds_gothic.to_netcdf(f"{data_dir}processed/SAIL/squire_gothic_{RESAMPLE_INTERVAL}.nc")
-    combined_ds_kettle_ponds.to_netcdf(f"{data_dir}processed/SAIL/squire_kettle_ponds_{RESAMPLE_INTERVAL}.nc")
+    combined_ds.to_netcdf(f"{data_dir}processed/SAIL/squire_{RESAMPLE_INTERVAL}.nc")
