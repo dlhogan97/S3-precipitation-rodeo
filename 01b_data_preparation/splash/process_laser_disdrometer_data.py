@@ -206,6 +206,12 @@ def process_laser_disdrometer_file(file_path):
 
 
 # %%
+parsivel_correction_dict = { 
+    'holroyd1971': [0.17, -1],
+    'brandes2007': [0.178, -0.922],
+    'heymsfield2004': [0.104, -0.95]
+}
+
 def mode_function(x):
         return x.mode().iloc[0] if not x.mode().empty else None
 def only_one(df, resampling_interval):
@@ -245,7 +251,7 @@ def per_group(df, resampling_interval):
             'NumRain': mode_function, 
             'NumNoRain': mode_function, 
             'NumAmbig': mode_function, 
-            'Type': 'mean'}))
+            'Type': 'mean'})) 
 
 def resample_xarray_dataset(ds, resampling_interval):
     """
