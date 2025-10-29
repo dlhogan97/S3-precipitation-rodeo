@@ -16,7 +16,8 @@ if __name__ == "__main__":
     splash_lpdf_ds = xr.open_dataset(f'{DATA_PATH}SPLASH/lpdf_gauge_30min.nc')
     splash_ld_ds = xr.open_dataset(f'{DATA_PATH}SPLASH/SPLASH_kp_laser_disdrometer_30min.nc')[['Amount']]
     sos_ds = xr.open_dataset(f'{DATA_PATH}SOS/sos_ds_30min.nc')[['SWE_p1_c_max_accum','SWE_p2_c_max_accum',
-                                                                'SWE_p3_c_max_accum','SWE_p4_c_max_accum',]]
+                                                                'SWE_p3_c_max_accum','SWE_p4_c_max_accum',]].diff(dim='time')
+    sos_ds = sos_ds.where(sos_ds>0, 0)
     sail_squire_ds = xr.open_dataset(f'{DATA_PATH}SAIL/squire_30min.nc').sel(site='kettle_ponds').sortby('time').squeeze()
     
     # merge kettle ponds datasets
