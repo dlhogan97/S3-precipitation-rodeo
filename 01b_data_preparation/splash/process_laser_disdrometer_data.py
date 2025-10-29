@@ -255,44 +255,56 @@ def per_group(df, resampling_interval):
 
 def resample_xarray_dataset(ds, resampling_interval):
     """
-    Resamples an xarray Dataset by converting it to a pandas DataFrame,
-    flattening the index, performing resampling, and converting back to xarray Dataset.
-    
-    Parameters:
-    - ds (xr.Dataset): Input xarray Dataset to be resampled.
-    - resampling_interval (str): Resampling interval string (e.g., '1H', '1D', '1M').
-    
-    Returns:
-    - xr.Dataset: Resampled xarray Dataset.
+    Resample an xarray Dataset along the 'time' dimension.
+    Particle distribution variables are averaged, while 
+    cumulative variables are summed, and categorical/mode-type 
+    variables are handled appropriately.
     """
+
     attrs_dataset = ds.attrs.copy()
     attrs_vars = {var: ds[var].attrs.copy() for var in ds.variables}
 
-    # Convert dataset to pandas DataFrame and flatten the multi-index
-    df = ds.to_dataframe().reset_index()
+    # Define how to handle each variable
+    mean_vars = ["Rate", "Z", "SignalAvg", "SignalStdDev", "TempAvg", 
+                 "TempStdDev", "VoltAvg", "VoltStdDev", 
+                 "HeatCurrentAvg", "HeatCurrentStdDev", "particle_distribution"]
+    sum_vars = ["Amount", "AmountSum", "NumParticle"]
+    mode_vars = ["Blackout", "Good", "Bad", "NumError", "Dirty", "VeryDirty", 
+                 "Damaged", "NumRain", "NumNoRain", "NumAmbig", "Type"]
 
-    # Perform resampling in pandas using agg, all dimension except size_bins should be averaged, size_bins should be constant
-    print("Starting computation...")
-    start_time = dt.datetime.now()
-    # ddf = dd.from_pandas(df, npartitions=50)
-    
-    # list the columns that should be grouped
-    grouped_cols = ['particle_distribution', 'size_bins','time']
-    ds_resampled_grouped = df[grouped_cols].groupby('size_bins').apply(lambda x: only_one(x, resampling_interval)).to_xarray()
+    # Initialize dictionary for resampled data
+    resampled_data = {}
 
-    # do the same for the non-grouped columns
-    non_grouped_cols = [col for col in df.columns if col not in grouped_cols] + ['time']
-    ds_resampled_non_grouped = per_group(df[non_grouped_cols], resampling_interval=resampling_interval).to_xarray()
-    # merge the two datasets
-    ds_resampled = xr.merge([ds_resampled_grouped, ds_resampled_non_grouped])
+    # 1️⃣ Mean variables
+    for var in mean_vars:
+        if var in ds:
+            resampled_data[var] = ds[var].resample(time=resampling_interval).mean(keep_attrs=True)
 
-    end_time = dt.datetime.now()
-    print('Duration: {}'.format(end_time - start_time))
+    # 2️⃣ Sum variables
+    for var in sum_vars:
+        if var in ds:
+            resampled_data[var] = ds[var].resample(time=resampling_interval).sum(keep_attrs=True)
 
-    # Restore attributes to the resampled xarray Dataset
+    # 3️⃣ Mode variables
+    def xr_mode(x, **kwargs):
+        """Compute statistical mode along time."""
+        vals, counts = np.unique(x[~np.isnan(x)], return_counts=True)
+        if len(counts) == 0:
+            return np.nan
+        return vals[np.argmax(counts)]
+
+    for var in mode_vars:
+        if var in ds:
+            resampled_data[var] = ds[var].resample(time=resampling_interval).reduce(xr_mode, keep_attrs=True)
+
+    # Merge everything into one dataset
+    ds_resampled = xr.Dataset(resampled_data)
+
+    # Restore attributes
     ds_resampled.attrs.update(attrs_dataset)
     for var in ds_resampled.variables:
-        ds_resampled[var].attrs.update(attrs_vars.get(var, {}))
+        if var in attrs_vars:
+            ds_resampled[var].attrs.update(attrs_vars[var])
 
     return ds_resampled
 

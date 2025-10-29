@@ -23,8 +23,7 @@ if __name__ == "__main__":
         "date","time","windSpeed_m_per_s","flg_windSpeed","windVecMag_m_per_s","flg_windVecMag",
         "windDirec_Deg", "flg_windDirec", "mxAirTemp_Deg_C", "flg_mxAirTemp", "mnAirTemp_Deg_C", "flg_mnAirTemp",
         "avAirTemp_Deg_C", "flg_avAirTemp", "relHumidty_%", "flg_relHumidty", "baromPress_mbar", "flg_baromPress",
-        "precip_mm", "flg_precip", 'accumPcpn_mm',  'flg_accumPcpn', 'pcpnS1Wire_mm',  'flg_pcpnS1Wire', 
-        'PcpnS2Wire_mm', 'flg_PcpnS2Wire', 'PcpnS3Wire_mm', 'flg_PcpnS3Wire', #'SnowDepth_mm', 'flg_SnowDepth',
+        "precip_mm", "flg_precip", 'accumPcpn_mm',  'flg_accumPcpn',
     ]
     flg_vars = [var for var in vars_to_keep if var.startswith("flg_")]
     non_flg_vars = [var for var in vars_to_keep if not var.startswith("flg_")]
@@ -34,7 +33,7 @@ if __name__ == "__main__":
     # zip flag and non-flag variables together
     for non_flg_var, flg_var in zip(non_flg_vars, flg_vars):
         # set non-flag variable to NaN where flag variable is not 0
-        df[non_flg_var] = df[non_flg_var].where(df[flg_var] == 0, np.nan)
+        df[non_flg_var] = df[non_flg_var].where(df[flg_var].isin([0,'E','0']), np.nan)
 
     sub_df = df[vars_to_keep]
     # make the index the combination of date and time
@@ -65,9 +64,6 @@ if __name__ == "__main__":
             'baromPress_mbar': 'mean',
             'precip_mm': 'sum',
             'accumPcpn_mm': 'sum',
-            'pcpnS1Wire_mm': 'sum',
-            'PcpnS2Wire_mm': 'sum',
-            'PcpnS3Wire_mm': 'sum',
             # 'SnowDepth_mm': 'mean',
         }
     )
@@ -90,9 +86,6 @@ if __name__ == "__main__":
         'baromPress_mbar': 'baromPress',
         'precip_mm': 'precip',
         'accumPcpn_mm': 'accumPcpn',
-        'pcpnS1Wire_mm': 'pcpnS1Wire',
-        'PcpnS2Wire_mm': 'pcpnS2Wire',
-        'PcpnS3Wire_mm': 'pcpnS3Wire',
         # 'SnowDepth_mm': 'SnowDepth',
     }
     for old_name, new_name in var_rename_dict.items():
