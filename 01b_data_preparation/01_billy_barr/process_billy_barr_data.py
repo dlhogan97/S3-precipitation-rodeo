@@ -12,18 +12,15 @@ def fast_mode_rounded(x):
     vals, counts = np.unique(rounded, return_counts=True)
     return vals[np.argmax(counts)]
 
-if __name__ == "__main__":
-    # access the data file (will need to suppl this file)
-    df = pd.read_csv("/storage/dlhogan/precipitation-rodeo/data/raw/billy-barr/billy-barr-20211001-20230930_colsAdjusted.csv",)
-
+def process_billy_barr_data(df):
     # remove spaces from all column names
     df.columns = df.columns.str.replace(' ', '')
 
     vars_to_keep = [
-        "date","time","windSpeed_m_per_s","flg_windSpeed","windVecMag_m_per_s","flg_windVecMag",
+        "date","time","windSpeed_m_per_s","flg_windSpeed",
         "windDirec_Deg", "flg_windDirec", "mxAirTemp_Deg_C", "flg_mxAirTemp", "mnAirTemp_Deg_C", "flg_mnAirTemp",
         "avAirTemp_Deg_C", "flg_avAirTemp", "relHumidty_%", "flg_relHumidty", "baromPress_mbar", "flg_baromPress",
-        "precip_mm", "flg_precip", 'accumPcpn_mm',  'flg_accumPcpn',
+        "precip_mm", "flg_precip",
     ]
     flg_vars = [var for var in vars_to_keep if var.startswith("flg_")]
     non_flg_vars = [var for var in vars_to_keep if not var.startswith("flg_")]
@@ -55,7 +52,6 @@ if __name__ == "__main__":
     sub_df_30min = sub_df.resample('30min').agg(
         {
             'windSpeed_m_per_s': 'mean',
-            'windVecMag_m_per_s': 'mean',
             'windDirec_Deg': fast_mode_rounded,
             'mxAirTemp_Deg_C': 'mean',
             'mnAirTemp_Deg_C': 'mean',
@@ -63,8 +59,6 @@ if __name__ == "__main__":
             'relHumidty_%': 'mean',
             'baromPress_mbar': 'mean',
             'precip_mm': 'sum',
-            'accumPcpn_mm': 'sum',
-            # 'SnowDepth_mm': 'mean',
         }
     )
 
@@ -77,7 +71,6 @@ if __name__ == "__main__":
     # rename variables by removing units after '_' from name, then save units in attrs
     var_rename_dict = {
         'windSpeed_m_per_s': 'windSpeed',
-        'windVecMag_m_per_s': 'windVecMag',
         'windDirec_Deg': 'windDirec',
         'mxAirTemp_Deg_C': 'mxAirTemp',
         'mnAirTemp_Deg_C': 'mnAirTemp',
@@ -85,8 +78,6 @@ if __name__ == "__main__":
         'relHumidty_%': 'relHumidty',
         'baromPress_mbar': 'baromPress',
         'precip_mm': 'precip',
-        'accumPcpn_mm': 'accumPcpn',
-        # 'SnowDepth_mm': 'SnowDepth',
     }
     for old_name, new_name in var_rename_dict.items():
         ds_30min = ds_30min.rename({old_name: new_name})
@@ -121,10 +112,21 @@ if __name__ == "__main__":
     ds_30min.attrs['processing_notes'] = 'Quality control flags were used to remove erroneous data. Data were resampled to 30 minute intervals using mean for continuous ' \
                                             'variables and sum for precipitation variables. Wind direction was resampled using mode after rounding to nearest 10 degrees.'
     ds_30min.attrs['date_created'] = pd.Timestamp.now().isoformat()
+    return ds_30min
 
-
-    # save to netcdf file
-    output_path = "/storage/dlhogan/precipitation-rodeo/data/processed/billy_barr/billy_barr_20211001_20230930_30min.nc"
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    ds_30min.to_netcdf(output_path)
-    ds_30min.close()
+if __name__ == "__main__":
+    file_dates = ["20011001-20251025","20211001-20230930"]
+    DATA_PATH = "/storage/dlhogan/precipitation-rodeo/data"
+    for dates in file_dates:
+        # access the data file (will need to suppl this file)
+        try:
+            df = pd.read_csv(f"{DATA_PATH}/raw/billy-barr/billy-barr-{dates}-colsAdjusted.csv",)
+        except FileNotFoundError:
+            print(f"File for dates {dates} not found. Check for correct data path. Skipping.")
+            continue
+        ds_30min = process_billy_barr_data(df)
+        # save to netcdf file
+        output_path = f"{DATA_PATH}/processed/billy_barr/billy_barr_{dates}_30min.nc"
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        ds_30min.to_netcdf(output_path)
+        ds_30min.close()
