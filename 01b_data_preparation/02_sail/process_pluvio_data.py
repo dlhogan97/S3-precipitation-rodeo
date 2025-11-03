@@ -21,7 +21,7 @@ files = glob.glob(f"{data_dir}raw/SAIL/aos_{SITE_NAME}/*.nc")
 if len(files) == 0:
     raise FileNotFoundError(f"No files found in {data_dir}/raw/SAIL/aos_{SITE_NAME}/")
 
-def process_pluvio_data(file, vars_to_keep, resample_interval='30min'):
+def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonableness_max=10):
     """
     Process a single Pluvio netCDF file.
 
@@ -36,8 +36,16 @@ def process_pluvio_data(file, vars_to_keep, resample_interval='30min'):
     ds = process_sail_data.initial_sail_processing(file, vars_to_keep=vars_to_keep)
 
     # fill times with 0 when maintenance_flag > 0
-    ds = ds.where(((ds['maintenance_flag'] == 0) | (ds['reset_flag'] == 0)), 0)
-
+    ds = ds.where(
+    (ds['maintenance_flag'] == 0)
+    & (ds['reset_flag'] == 0)
+    & (ds['pluvio_status'] == 0)
+    & (ds['heater_status'] == 0)
+    & (ds['accum_nrt'] < reasonableness_max), # 10-year threshold
+    np.nan
+    )
+    # apply reasonableness check to intensity_rt
+    ds['intensity_rt'] = ds['intensity_rt'].where(ds['intensity_rt'] <= reasonableness_max, np.nan)
     # accumulated variables: sum
     accum_rtnrt_da = ds['accum_rtnrt'].resample(time=resample_interval).sum()
     accum_nrt_da = ds['accum_nrt'].resample(time=resample_interval).sum()
@@ -70,6 +78,7 @@ if __name__ == "__main__":
     data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
     files = glob.glob(f"{data_dir}raw/SAIL/pluvio/*.nc")
     RESAMPLE_INTERVAL = '30min'  # resample interval
+    REASONABLENESS_MAX = 10  # maximum reasonable intensity in mm between 2 five minute observations
 
     vars_to_keep = [
     'intensity_rt',
@@ -79,6 +88,8 @@ if __name__ == "__main__":
     'maintenance_flag',
     'reset_flag',
     'intensity_rtnrt',
+    'pluvio_status',
+    'heater_status',
     'lat',
     'lon',
     'alt',
@@ -94,7 +105,7 @@ if __name__ == "__main__":
         print("Processing file {}/{}: {}".format(i+1,len(files),file))
         start = time.time()
         try:
-            ds_processed = process_pluvio_data(file, vars_to_keep, resample_interval=RESAMPLE_INTERVAL)
+            ds_processed = process_pluvio_data(file, vars_to_keep, resample_interval=RESAMPLE_INTERVAL, reasonableness_max=REASONABLENESS_MAX)
         except Exception as e:
             print("Error processing file {}: {}".format(file, e))
             erroneous_files.append(file)

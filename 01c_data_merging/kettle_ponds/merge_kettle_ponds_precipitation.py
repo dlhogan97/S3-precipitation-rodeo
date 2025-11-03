@@ -12,7 +12,7 @@ DATA_PATH = '/storage/dlhogan/precipitation-rodeo/data/processed/'
 
 if __name__ == "__main__":
     # Load datasets from Kettle p\Ponds
-    billy_barr_ds = xr.open_dataset(f'{DATA_PATH}billy_barr/billy_barr_20211001_20230930_30min.nc')[['precip']]
+    billy_barr_ds = xr.open_dataset(f'{DATA_PATH}billy_barr/billy_barr_20211001-20230930_30min.nc')[['precip']]
     splash_lpdf_ds = xr.open_dataset(f'{DATA_PATH}SPLASH/lpdf_gauge_30min.nc')
     splash_ld_ds = xr.open_dataset(f'{DATA_PATH}SPLASH/SPLASH_kp_laser_disdrometer_30min.nc')[['Amount']]
     sos_ds = xr.open_dataset(f'{DATA_PATH}SOS/sos_ds_30min.nc')[['SWE_p1_c_max_accum','SWE_p2_c_max_accum',

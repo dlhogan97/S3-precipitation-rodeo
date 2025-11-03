@@ -12,7 +12,7 @@ DATA_PATH = '/storage/dlhogan/precipitation-rodeo/data/processed/'
 
 if __name__ == "__main__":
     # Load datasets from Gothic
-    billy_barr_ds = xr.open_dataset(f'{DATA_PATH}billy_barr/billy_barr_20211001_20230930_30min.nc')['precip'].to_dataset().sortby('time')
+    billy_barr_ds = xr.open_dataset(f'{DATA_PATH}billy_barr/billy_barr_20211001-20230930_30min.nc')['precip'].to_dataset().sortby('time')
     sail_ld_ds = xr.open_dataset(f'{DATA_PATH}SAIL/laser_disdrometer_gothic_processed_30min.nc')[['precip_accum_uncorrected','precip_accum_holyroyd',
                                                                                                 'precip_accum_brandes','precip_accum_heymsfield',]].sortby('time')
     sail_pluvio_ds = xr.open_dataset(f'{DATA_PATH}SAIL/pluvio_30min.nc')['accum_nrt'].to_dataset().sortby('time')
