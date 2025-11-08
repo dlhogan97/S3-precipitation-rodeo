@@ -97,7 +97,7 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
         if 'qc' in var:
             data_var = var.replace('qc_', '')
             # drop replace values with NaN where qc is not 0
-            ds_sub[data_var] = ds_sub[data_var].where(ds_sub[var] == 0)
+            ds_sub[data_var] = ds_sub[data_var].where(ds_sub[var] == 0, np.nan)
     #  4. calculate correction for snow using all methods (save these as individual arrays)
     precip_rate_uncorrected = ds_sub['precip_rate']
     precip_rate_holroyd = correct_SAIL_parsivel_for_snow(ds_sub, 'holroyd1971')

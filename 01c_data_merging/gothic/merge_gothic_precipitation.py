@@ -65,6 +65,9 @@ if __name__ == "__main__":
 
     # Save the merged dataset
     output_filepath = f'{DATA_PATH}final/gothic_precipitation_30min.nc'
-    gothic_combined_ds.to_netcdf(output_filepath)
-    print(f'Merged dataset saved to {output_filepath}')
+    try:
+        gothic_combined_ds.to_netcdf(output_filepath)
+        print(f'Merged dataset saved to {output_filepath}')
+    except Exception as e:
+        print(f'Error saving merged dataset: {e}')
     gothic_combined_ds.close()

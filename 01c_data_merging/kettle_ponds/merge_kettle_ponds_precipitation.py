@@ -44,6 +44,9 @@ if __name__ == "__main__":
                           }
 
     kettle_ponds_combined_ds = kettle_ponds_combined_ds.rename(variable_renames_kp)
+    # drop the following
+    to_drop = ['snow_rate_ws88diw','snow_rate_m2009_1','snow_rate_m2009_2','snow_rate_ws2012',]
+    kettle_ponds_combined_ds = kettle_ponds_combined_ds.drop_vars(to_drop, errors='ignore')
 
     # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 50 mm
     for var in kettle_ponds_combined_ds.data_vars:
@@ -52,6 +55,9 @@ if __name__ == "__main__":
 
     # Save the merged dataset
     output_filepath = f'{DATA_PATH}final/kettle_ponds_precipitation_30min.nc'
-    kettle_ponds_combined_ds.to_netcdf(output_filepath)
-    print(f'Merged dataset saved to {output_filepath}')
+    try:
+        kettle_ponds_combined_ds.to_netcdf(output_filepath)
+        print(f'Merged dataset saved to {output_filepath}')
+    except Exception as e:
+        print(f'Error saving merged dataset: {e}')
     kettle_ponds_combined_ds.close()
