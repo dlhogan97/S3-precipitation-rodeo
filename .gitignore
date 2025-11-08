@@ -267,3 +267,7 @@ cython_debug/
 01a_data_access/03_splash/archive/wy23_resampled_5min_SPLASH_kp_ldis.nc
 01a_data_access/03_splash/archive/wy23_SPLASH_kp_ldis.nc
 01a_data_access/splash/archive/tilden_precip_2022_2023.csv
+
+# Figures
+04_products/figures/events/*
+04_products/figures/accumulated/*
