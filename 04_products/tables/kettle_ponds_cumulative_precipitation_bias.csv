@@ -1,0 +1,14 @@
+,Full Period,Water Year 2022,Water Year 2023,Warm Season 2022,Cold Season 2022,Warm Season 2023,Cold Season 2023
+splash_lpdf,-58.4,13.0,-69.0,-38.5,30.3,-18.9,-30.5
+splash_ld_uncorrected,365.4,212.2,149.9,-37.2,236.0,-24.4,174.3
+sos_swe_p1,,,,,,,-128.1
+sos_swe_p2,,,,,,,-198.7
+sos_swe_p3,,,,,,,-209.0
+sos_swe_p4,,,,,,,-147.7
+rain_rate_A,,,,,-300.9,,-483.5
+sail_squire_snow_ws88diw,,,,,31.4,,-218.0
+sail_squire_snow_m2009_1,,,,,-112.0,,-410.7
+sail_squire_snow_m2009_2,,,,,-167.2,,-435.5
+sail_squire_snow_ws2012,,,,,-101.0,,-339.6
+ERA5-Land,157.0,164.4,82.1,111.4,21.0,99.0,-17.0
+PRISM,-163.5,-21.8,-79.7,29.8,-55.2,42.4,-127.0
