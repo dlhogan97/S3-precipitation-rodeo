@@ -493,3 +493,184 @@ def get_point_info(ds):
         crs="EPSG:4326",
     )
     return gdf
+
+
+class TaylorDiagram:
+    """
+    Taylor Diagram for comparing datasets against a reference.
+    Includes:
+    - Pairwise NaN handling
+    - Analytic RMS curves as curves
+    - Upper-right quadrant only
+
+    Source - ChatGPT
+    Adapted from: https://pcmdi.llnl.gov/staff/taylor/CV/Taylor_diagram_primer.pdf
+    """
+
+    def __init__(self, ref, fig=None, rect=111, label='Reference'):
+        # Prepare reference
+        self.ref = np.asarray(ref).ravel()
+        self.ref_std = np.std(self.ref[~np.isnan(self.ref)], ddof=1)
+
+        # Create figure
+        if fig is None:
+            fig = plt.figure(figsize=(8, 7))
+        self.fig = fig
+
+        # Polar axis
+        self.ax = fig.add_subplot(rect, polar=True)
+
+        # Standard Taylor diagram orientation
+        self.ax.set_theta_direction(1)          # CCW = standard
+        self.ax.set_theta_zero_location('E')     # 0° (corr=1) on +x
+        self.ax.set_thetamin(0)                  # only upper-right
+        self.ax.set_thetamax(90)
+
+        # Radial limit (std axis)
+        self.ax.set_rlim(0, 1.25 * self.ref_std)
+
+        # Plot reference point
+        self.ax.plot(
+            0, self.ref_std,
+            marker='o', markersize=12,
+            markeredgecolor='k', markerfacecolor='k',
+            label=label
+        )
+
+        # Correlation ticks on theta axis
+        corr_ticks = np.array([1.0, 0.95, 0.9, 0.8, 0.7, 0.5, 0.3, 0.1, 0.0])
+        theta_ticks = np.degrees(np.arccos(corr_ticks))
+        self.ax.set_thetagrids(theta_ticks, labels=[f"{c}" for c in corr_ticks])
+
+        # Axis labels
+        self.ax.set_ylabel("Standard Deviation (Instrument)\n(mm/day)", labelpad=20)
+        self.ax.set_xlabel("Standard Deviation (Benchmark)\n(mm/day)", labelpad=20)
+
+        # add ticks to y-axis
+        self.ax.yaxis.set_ticks_position('left')
+        self.ax.xaxis.set_ticks_position('bottom')
+
+        # remove radial axis ticks
+        # self.ax.set_yticklabels([])
+        # self.ax.set_xticklabels([])
+
+        # Title for the circular axis
+        self.ax.text(
+            np.deg2rad(45),       # halfway
+            self.ax.get_rmax() * 1.7,
+            "Correlation",
+            ha='center', va='center', fontsize=16,
+        )
+
+
+    def _pairwise_clean(self, a, b):
+        """Clean paired NaNs and flatten."""
+        a = np.asarray(a).ravel()
+        b = np.asarray(b).ravel()
+        mask = ~np.isnan(a) & ~np.isnan(b)
+        return a[mask], b[mask]
+
+
+    def add_sample(self, data, label, marker='o', color='C0'):
+        """Add a dataset point to the diagram."""
+        ref_clean, data_clean = self._pairwise_clean(self.ref, data)
+
+        if len(ref_clean) < 2:
+            corr, std = np.nan, np.nan
+        else:
+            corr = np.corrcoef(ref_clean, data_clean)[0, 1]
+            std = np.std(data_clean, ddof=1)
+
+        theta = np.arccos(corr)    # angle = arccos(corr)
+
+        # ALWAYS (theta, r) in polar coordinates
+        self.ax.plot(
+            theta, std,
+            linestyle='None',
+            marker=marker,
+            markersize=12,
+            markerfacecolor=color,
+            markeredgecolor='k',
+            markeredgewidth=1.5,
+            label=label
+        )
+
+
+    def add_rms_curves(self, levels, color='limegreen', ls='-', lw=1.5, ntheta=721):
+        """
+        Draw RMS curves as full circles centered on the reference standard deviation.
+        """
+        theta = np.linspace(0, 2*np.pi, ntheta)  # full circle
+
+        for c in levels:
+            # Circle radius = c, center at (ref_std, 0)
+            x = self.ref_std + c * np.cos(theta)
+            y = 0 + c * np.sin(theta)
+
+            # Convert to polar coordinates if using a polar axis
+            r = np.sqrt(x**2 + y**2)
+            theta_polar = np.arctan2(y, x)
+
+            # Plot circle
+            self.ax.plot(theta_polar, r, color='dodgerblue', linestyle=ls, linewidth=lw,)
+
+            # Optional: label at theta = pi/4 along the circle
+            self.ax.text(
+                0.1, np.sqrt((self.ref_std + c*np.cos(np.pi/8))**2 + (c*np.sin(np.pi/8))**2),
+                f"{c}", color='dodgerblue', ha='left', va='center', fontsize=12
+            )
+
+
+    def add_std_ticks(self, ticks, tick_length=0.02, color='k', lw=1.2):
+        """
+        Add identical tick marks to the x-axis (theta=0°) and y-axis (theta=90°)
+        at the given radial positions (std ticks).
+        """
+        for r in ticks:
+            # x-axis tick (theta = 0 rad)
+            theta = 0
+            self.ax.plot([theta, theta], [r - tick_length, r + tick_length],
+                        color=color, lw=lw)
+
+            # y-axis tick (theta = 90°)
+            theta = np.pi/2
+            self.ax.plot([theta, theta], [r - tick_length, r + tick_length],
+                        color=color, lw=lw)
+        offset=0.3
+        # Label radial ticks at different angles
+        angles = [0, np.pi/2]  # right, top, left, bottom
+
+        for theta in angles:
+            for r in ticks:
+                # Compute a small radial offset in the direction away from center
+                r_offset = r + offset
+                
+                # Determine horizontal alignment based on quadrant
+                if 0 <= theta < np.pi/2 or 3*np.pi/2 <= theta < 2*np.pi:
+                    ha = 'left'
+                else:
+                    ha = 'right'
+                
+                # Determine vertical alignment based on quadrant
+                if 0 < theta < np.pi:
+                    va = 'bottom'
+                else:
+                    va = 'top'
+                
+                self.ax.text(
+                    theta, r_offset,
+                    f"{r:.1f}",
+                    ha=ha,
+                    va=va,
+                    rotation=0,              # keep upright
+                    rotation_mode='anchor',  # rotation relative to text box
+                    fontsize=12,
+                    color='black'
+                )
+
+
+    def add_bias_circle(self, ls='--', color='black', lw=1.5, ntheta=721):
+        """Add the bias circle (radius = ref_std)."""
+        theta = np.linspace(0, np.pi/2, ntheta)
+        r = np.ones_like(theta) * self.ref_std
+        self.ax.plot(theta, r, linestyle=ls, color=color, linewidth=lw)
