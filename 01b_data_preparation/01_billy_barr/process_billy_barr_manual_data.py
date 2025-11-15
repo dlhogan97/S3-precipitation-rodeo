@@ -51,5 +51,5 @@ if __name__ == "__main__":
     ds['rain'].attrs['long_name'] = 'Daily Rainfall'
 
     # save the dataset
-    ds.to_netcdf("/storage/dlhogan/precipitation-rodeo/data/processed/billy_barr/billy_barr_snow_data.nc")
-    print("Saved processed data to /storage/dlhogan/precipitation-rodeo/data/processed/billy_barr/billy_barr_snow_data.nc")
+    ds.to_netcdf("/storage/dlhogan/precipitation-rodeo/data/processed/billy_barr/billy_barr_manual_data.nc")
+    print("Saved processed data to /storage/dlhogan/precipitation-rodeo/data/processed/billy_barr/billy_barr_manual_data.nc")
