@@ -21,5 +21,5 @@ if not os.path.exists(filepath+'laser_disdrometer_stats_KP'):
 else:
     print('Data already downloaded')
     # we'll start by loading in one file and looking at the data
-    filepath = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/laser_disdrometer_stats_KP/*'
-    files = glob.glob(filepath)
+    outpath = f'{filepath}laser_disdrometer_stats_KP/*'
+    files = glob.glob(outpath)
