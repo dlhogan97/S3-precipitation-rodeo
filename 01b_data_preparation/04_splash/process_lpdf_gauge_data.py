@@ -2,7 +2,7 @@ import pandas as pd
 import glob
 import xarray as xr
 
-def process_lpdf_data(file):
+def process_lpdf_data(file, reasonable_threshold=None):
     # read in data
     df = pd.read_csv(file, sep=r'\s+', header=0,)
     # select columns
@@ -43,6 +43,10 @@ def process_lpdf_data(file):
     ]
     sub_df = sub_df[~sub_df.index.isin(dst_transition_times)]
     
+    # apply reasonableness threshold
+    if reasonable_threshold is not None:
+        sub_df['Precip_mm'] = sub_df['Precip_mm'].where(sub_df['Precip_mm'] <= reasonable_threshold, float('nan'))
+    
     # set time zone
     # sub_df.index = sub_df.index.tz_localize('America/Denver', nonexistent='NaT', ambiguous='NaT')
     return sub_df
@@ -54,6 +58,7 @@ if __name__ == "__main__":
 
     files = glob.glob(f"{data_dir}raw/SPLASH/LPDF_gauge/*.txt")
     output_path = f"{data_dir}/processed/SPLASH/lpdf_gauge_30min.nc"
+    REASONABLE_THRESHOLD = 1.12 * 25.4  # reasonable threshold for precipitation
     if len(files) == 0:
         raise ValueError("No files found for processing. Get data from SPLASH LPDF gauge (refer to 01a_data_access README).")
     

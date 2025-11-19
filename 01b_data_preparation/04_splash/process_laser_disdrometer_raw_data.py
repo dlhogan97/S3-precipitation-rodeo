@@ -20,7 +20,7 @@ else:
     original_storage_path = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/laser_disdrometer_raw_KP/*'
     files = glob.glob(original_storage_path)
 
-def process_laser_disdrometer_file(file_path):
+def process_laser_disdrometer_file(file_path, reasonable_threshold=None):
     """
     Process a laser disdrometer file and return a xarray Dataset with the data.
     """
@@ -134,6 +134,10 @@ def process_laser_disdrometer_file(file_path):
             "size_bins": size_bins,
         }
     )
+    
+    # apply reasonableness threshold
+    if reasonable_threshold is not None:
+        ds['Amount'] = ds['Amount'].where(ds['Amount'] <= reasonable_threshold, np.nan)
     
     # Add descriptor attributes
     ds["Blackout"].attrs["descriptor"] = "Samples"
@@ -319,7 +323,7 @@ for file in files:
     if files.index(file) % 100 == 0:
         print(f"Processing file {files.index(file)} of {len(files)}")
     try:
-        ds = process_laser_disdrometer_file(file)
+        ds = process_laser_disdrometer_file(file, reasonable_threshold=0.522*25.44)  # defined as 100-year precip event over 10 minutes, converted to mm and sourced from NOAA Atlas 14
         # resample to 5-minutes
         # ds = resample_xarray_dataset(ds, '30min')
         ds_list.append(ds)

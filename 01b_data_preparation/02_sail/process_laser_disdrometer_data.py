@@ -20,7 +20,8 @@ files = glob.glob(f"{data_dir}raw/SAIL/laser_disdrometer_{SITE_NAME}/*.nc")
 parsivel_correction_dict = { 
     'holroyd1971': [0.17, -1],
     'brandes2007': [0.178, -0.922],
-    'heymsfield2004': [0.104, -0.95]
+    'heymsfield2004': [0.104, -0.95],
+    'huang2010' : [0.115, -1.188]
 }
 
 def correct_SAIL_parsivel_for_snow(ds, method='holroyd1971'):
@@ -36,9 +37,9 @@ def correct_SAIL_parsivel_for_snow(ds, method='holroyd1971'):
     # Class size width
     class_size_width = ds['class_size_width']
 
-    # Apply the condition to include particle sizes from 2 to 31
-    particle_size_indices = range(2, 32)
-    raw_fall_velocity_indices = range(2, 32)
+    # Apply the condition to include particle sizes from 3 to 31
+    particle_size_indices = range(3, 32)
+    raw_fall_velocity_indices = range(3, 32)
 
     # Select the relevant slices using isel
     N_D_masked = N_D.isel(particle_size=particle_size_indices)
@@ -76,7 +77,7 @@ vars_to_keep = [
         'lat',
         'alt',
         ]
-def process_disdrometer_data(file, resample_interval='30min', local_tz='America/Denver'):
+def process_disdrometer_data(file, resample_interval='30min', local_tz='America/Denver', reasonable_threshold=None):
     ### 1. open the dataset
     ds = xr.open_dataset(file)
     ### 2. subset to only the variables we want
@@ -98,6 +99,9 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
             data_var = var.replace('qc_', '')
             # drop replace values with NaN where qc is not 0
             ds_sub[data_var] = ds_sub[data_var].where(ds_sub[var] == 0, np.nan)
+    # replace unreasonable precip rates with NaN
+    if reasonable_threshold is not None:
+        ds_sub['precip_rate'] = ds_sub['precip_rate'].where(ds_sub['precip_rate'] <= reasonable_threshold, np.nan)
     #  4. calculate correction for snow using all methods (save these as individual arrays)
     precip_rate_uncorrected = ds_sub['precip_rate']
     precip_rate_holroyd = correct_SAIL_parsivel_for_snow(ds_sub, 'holroyd1971')
@@ -195,6 +199,7 @@ if __name__ == "__main__":
     os.chdir("/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo/")
     SITE_NAME = "gothic"  # change if needed
     RESAMPLE_INTERVAL = '30min'
+    REASONABLE_THRESHOLD = 0.522*25.4  # set to None or 5-minute maximum precip rate in mm from NOAA Atlas 14
     data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
     files = glob.glob(f"{data_dir}raw/SAIL/laser_disdrometer_{SITE_NAME}/*.nc")
     print(f"Processing laser disdrometer data for site: {SITE_NAME}")
@@ -207,7 +212,10 @@ if __name__ == "__main__":
         print("Processing file {}/{}: {}".format(i+1,len(files),file))
         start = time.time()
         try:
-            ds_processed = process_disdrometer_data(file, resample_interval=RESAMPLE_INTERVAL, local_tz='America/Denver')
+            ds_processed = process_disdrometer_data(file, 
+                                                    resample_interval=RESAMPLE_INTERVAL, 
+                                                    local_tz='America/Denver', 
+                                                    reasonable_threshold=REASONABLE_THRESHOLD)
             processed_datasets.append(ds_processed)
         except Exception as e:
             print(f"Error processing file {file}: {e}")

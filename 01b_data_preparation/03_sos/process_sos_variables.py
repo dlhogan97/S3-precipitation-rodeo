@@ -19,7 +19,7 @@ def fast_mode_rounded(x):
     vals, counts = np.unique(rounded, return_counts=True)
     return vals[np.argmax(counts)]
 
-def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min'):
+def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min', reasonable_threshold=None):
     sub_ds = ds[vars_to_keep]
     ds.close()
 
@@ -29,7 +29,7 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min')
         sub_ds[var] = sub_ds[var].bfill(dim='time')
         # remove any values with large absolute differences between time steps
         swe_diff = sub_ds[var].diff(dim='time')
-        large_diff_mask = np.abs(swe_diff) > 30  # threshold of 30 mm
+        large_diff_mask = np.abs(swe_diff) > reasonable_threshold  # threshold of 30 mm
         # set the value after the large diff to NaN
         indices_to_nan = large_diff_mask.where(large_diff_mask, drop=True).time
         sub_ds[var] = sub_ds[var].where(~sub_ds['time'].isin(indices_to_nan), np.nan)
@@ -87,6 +87,7 @@ if __name__ == "__main__":
     swe_vars = hf.SWE_VARIABLES
     rad_vars = hf.RADIATION_VARIABLES
     RESAMPLE_INTERVAL = '30min'
+    REASONABLE_THRESHOLD = 0.522 * 25.4  # reasonable threshold for precipitation
 
     vars_to_keep = wind_vars + wv_vars + temp_vars + press_vars + swe_vars
 
@@ -99,7 +100,7 @@ if __name__ == "__main__":
     # remove vertical wind speed w_
     vars_to_keep = [var for var in vars_to_keep if not var.startswith('w_')] + rad_vars
 
-    processed_ds = process_sos_variables(ds, vars_to_keep, swe_vars, RESAMPLE_INTERVAL)
+    processed_ds = process_sos_variables(ds, vars_to_keep, swe_vars, RESAMPLE_INTERVAL, REASONABLE_THRESHOLD)
     processed_ds['time'] = pd.to_datetime(processed_ds['time'].values).tz_localize(None)
     processed_ds.to_netcdf(f"{storage_dir}processed/SOS/sos_ds_30min.nc")
     print(f"Processed SOS variables and saved to {storage_dir}processed/SOS/sos_ds_30min.nc")

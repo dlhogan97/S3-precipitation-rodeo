@@ -9,7 +9,7 @@ if project_root not in sys.path:
 from utils.helper_funcs import convert_to_local_time, get_point_info
 import time
 
-def process_squire_data(files, resample_interval='30min', gothic_point_info=None, kettle_ponds_point_info=None):
+def process_squire_data(files, resample_interval='30min', gothic_point_info=None, kettle_ponds_point_info=None, reasonable_threshold=None):
     ds_list_gothic = []
     ds_list_kettle_ponds = []
     for i, file in enumerate(files):
@@ -34,6 +34,13 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
         ds_kettle_ponds = ds.sel(lon=kettle_ponds_point_info['longitude'].values
                             , lat=kettle_ponds_point_info['latitude'].values, method='nearest').squeeze()
         ds_kettle_ponds = ds_kettle_ponds.expand_dims(site=['kettle_ponds'])
+
+        # apply reasonableness threshold
+        if reasonable_threshold is not None:
+            for var in ds_gothic.data_vars:
+                ds_gothic[var] = ds_gothic[var].where(ds_gothic[var] <= reasonable_threshold, np.nan)
+            for var in ds_kettle_ponds.data_vars:
+                ds_kettle_ponds[var] = ds_kettle_ponds[var].where(ds_kettle_ponds[var] <= reasonable_threshold, np.nan)
 
         # resample to resample interval
         ds_gothic_resampled = ds_gothic.resample(time=resample_interval).mean().squeeze()
@@ -108,6 +115,7 @@ if __name__ == "__main__":
         print(f"Error finding SQUIRE files: {e}")
 
     RESAMPLE_INTERVAL = '30min'
+    REASONABLE_THRESHOLD = 0.522 * 25.4  # reasonable threshold for precipitation
     # get the lon and lat values for gothic and kettle ponds
     try:
         example_gothic_ds = xr.open_dataset(f"{data_dir}processed/SAIL/met_30min.nc")
@@ -125,7 +133,8 @@ if __name__ == "__main__":
     combined_ds = process_squire_data(
         files, resample_interval=RESAMPLE_INTERVAL,
         gothic_point_info=gothic_point_info,
-        kettle_ponds_point_info=kettle_ponds_point_info
+        kettle_ponds_point_info=kettle_ponds_point_info,
+        reasonable_threshold=REASONABLE_THRESHOLD
     )
     try:
         combined_ds.to_netcdf(f"{data_dir}processed/SAIL/squire_{RESAMPLE_INTERVAL}.nc")

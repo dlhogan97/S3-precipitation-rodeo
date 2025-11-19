@@ -40,6 +40,7 @@ def process_asfs_data(files, vars_to_keep=None, resample_interval='30min'):
         # convert to local time
         sub_ds = hf.convert_to_local_time(sub_ds, local_tz='America/Denver')
 
+
         # resample to 30min
         sub_ds_30min = sub_ds.resample(time=resample_interval).mean() 
         

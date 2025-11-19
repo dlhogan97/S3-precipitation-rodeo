@@ -12,15 +12,6 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 
-# Assign data directory and get files
-SITE_NAME = "mtcb"
-data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
-files = glob.glob(f"{data_dir}raw/SAIL/aos_{SITE_NAME}/*.nc")
-
-# make sure files exist
-if len(files) == 0:
-    raise FileNotFoundError(f"No files found in {data_dir}/raw/SAIL/aos_{SITE_NAME}/")
-
 def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonableness_max=10):
     """
     Process a single Pluvio netCDF file.
@@ -41,11 +32,12 @@ def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonabl
     & (ds['reset_flag'] == 0)
     & (ds['pluvio_status'] == 0)
     & (ds['heater_status'] == 0)
-    & (ds['accum_nrt'] < reasonableness_max), # 10-year threshold
+    & (ds['accum_nrt'] < reasonableness_max), # 100-year threshold
     np.nan
     )
     # apply reasonableness check to intensity_rt
-    ds['intensity_rt'] = ds['intensity_rt'].where(ds['intensity_rt'] <= reasonableness_max, np.nan)
+    if reasonableness_max is not None:
+        ds['intensity_rt'] = ds['intensity_rt'].where(ds['intensity_rt'] <= reasonableness_max, np.nan)
     # accumulated variables: sum
     accum_rtnrt_da = ds['accum_rtnrt'].resample(time=resample_interval).sum()
     accum_nrt_da = ds['accum_nrt'].resample(time=resample_interval).sum()
@@ -78,7 +70,7 @@ if __name__ == "__main__":
     data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
     files = glob.glob(f"{data_dir}raw/SAIL/pluvio/*.nc")
     RESAMPLE_INTERVAL = '30min'  # resample interval
-    REASONABLENESS_MAX = 10  # maximum reasonable intensity in mm between 2 five minute observations
+    REASONABLENESS_MAX = 0.522*25.4  # maximum reasonable intensity in mm between 2 five minute observations
 
     vars_to_keep = [
     'intensity_rt',

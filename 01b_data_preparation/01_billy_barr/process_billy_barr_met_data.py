@@ -12,7 +12,7 @@ def fast_mode_rounded(x):
     vals, counts = np.unique(rounded, return_counts=True)
     return vals[np.argmax(counts)]
 
-def process_billy_barr_data(df):
+def process_billy_barr_data(df, reasonable_threshold=None):
     # remove spaces from all column names
     df.columns = df.columns.str.replace(' ', '')
 
@@ -48,6 +48,9 @@ def process_billy_barr_data(df):
     # drop flag columns
     sub_df = sub_df.drop(columns=flg_vars)
 
+    # apply reasonablness threshold 
+    if reasonable_threshold is not None:
+        sub_df['precip_mm'] = sub_df['precip_mm'].where(sub_df['precip_mm'] <= reasonable_threshold, np.nan)
     # resample to 30 min intervals
     sub_df_30min = sub_df.resample('30min').agg(
         {
@@ -124,7 +127,9 @@ if __name__ == "__main__":
         except FileNotFoundError:
             print(f"File for dates {dates} not found. Check for correct data path. Skipping.")
             continue
-        ds_30min = process_billy_barr_data(df)
+        REASONABLE_THRESHOLD = 0.764*25.44  # defined as 100-year precip event over 10 minutes, converted to mm and sourced from NOAA Atlas 14
+        ds_30min = process_billy_barr_data(df, 
+                                           reasonable_threshold=REASONABLE_THRESHOLD)
         # save to netcdf file
         output_path = f"{DATA_PATH}/processed/billy_barr/billy_barr_{dates}_30min.nc"
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

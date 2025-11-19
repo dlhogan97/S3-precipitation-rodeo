@@ -40,7 +40,7 @@ def calculate_wind_components(wind_speed, wind_direction):
 
     return u.data, v.data
 
-def process_met_data(file, vars_to_keep, resample_interval='30min'):
+def process_met_data(file, vars_to_keep, resample_interval='30min', reasonable_threshold=None):
     """
     Process a single MET netCDF file.
 
@@ -60,6 +60,9 @@ def process_met_data(file, vars_to_keep, resample_interval='30min'):
     org_precip_accum.attrs["units"] = "mm"
     org_precip_accum.attrs["long_name"] = "Original Precipitation Accumulation"
 
+    if reasonable_threshold is not None:
+        ds['org_precip_rate_mean'] = ds['org_precip_rate_mean'].where(ds['org_precip_rate_mean'] <= reasonable_threshold, np.nan)
+
     # calculate wind components
     # Calculate u and v components if both wind speed and direction are present
     if 'wspd_vec_mean' in ds and 'wdir_vec_mean' in ds:
@@ -74,9 +77,9 @@ def process_met_data(file, vars_to_keep, resample_interval='30min'):
     # resample to desired length
     # accumulated variables: sum
     org_precip_accum_da = org_precip_accum.resample(time=resample_interval).sum()
-    pwd_cumul_rain_da = (ds['pwd_cumul_rain'].where(ds['pwd_cumul_rain'] < 5, np.nan)).resample(time=resample_interval).sum()
+    pwd_cumul_rain_da = (ds['pwd_cumul_rain'].where(ds['pwd_cumul_rain'] < reasonable_threshold, np.nan)).resample(time=resample_interval).sum()
     pwd_cumul_snow_da = ds['pwd_cumul_snow'].resample(time=resample_interval).sum()
-    tbrg_precip_total_da = ds['tbrg_precip_total'].resample(time=resample_interval).sum()
+    tbrg_precip_total_da = ds['tbrg_precip_total'].where(ds['tbrg_precip_total'] < reasonable_threshold, np.nan).resample(time=resample_interval).sum()
     tbrg_precip_total_corr_da = ds['tbrg_precip_total_corr'].resample(time=resample_interval).sum()
 
     # mean variables: mean
@@ -135,7 +138,7 @@ if __name__ == "__main__":
     data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
     files = glob.glob(f"{data_dir}raw/SAIL/met/*.nc")
     RESAMPLE_INTERVAL = '30min'  # resample interval
-
+    REASONABLE_THRESHOLD = 0.522 * 25.4  # reasonable threshold for precipitation
     vars_to_keep = [
     'atmos_pressure','temp_mean','rh_mean','vapor_pressure_mean',
     'wspd_vec_mean','wdir_vec_mean','pwd_err_code','pwd_mean_vis_1min',
@@ -154,7 +157,10 @@ if __name__ == "__main__":
         print("Processing file {}/{}: {}".format(i+1,len(files),file))
         start = time.time()
         try:
-            ds_processed = process_met_data(file, vars_to_keep, resample_interval=RESAMPLE_INTERVAL)
+            ds_processed = process_met_data(file, 
+                                            vars_to_keep, 
+                                            resample_interval=RESAMPLE_INTERVAL, 
+                                            reasonable_threshold=REASONABLE_THRESHOLD)
         except Exception as e:
             print("Error processing file {}: {}".format(file, e))
             erroneous_files.append(file)
