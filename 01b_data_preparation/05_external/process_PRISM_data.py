@@ -65,5 +65,5 @@ if __name__ == "__main__":
             ds_all = ds_sites
 
     # save the combined dataset
-    ds_all.to_netcdf(f"{data_dir}processed/PRISM/prism_site_data.nc")
-    print(f"Saved PRISM site data to netcdf: {data_dir}processed/PRISM/prism_site_data.nc")
+    ds_all.to_netcdf(f"{data_dir}processed/final/PRISM/prism_site_data.nc")
+    print(f"Saved PRISM site data to netcdf: {data_dir}processed/final/PRISM/prism_site_data.nc")

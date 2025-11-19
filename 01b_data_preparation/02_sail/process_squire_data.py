@@ -39,6 +39,7 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
         if reasonable_threshold is not None:
             for var in ds_gothic.data_vars:
                 ds_gothic[var] = ds_gothic[var].where(ds_gothic[var] <= reasonable_threshold, np.nan)
+                # apply lower bound of 0.05 mm
             for var in ds_kettle_ponds.data_vars:
                 ds_kettle_ponds[var] = ds_kettle_ponds[var].where(ds_kettle_ponds[var] <= reasonable_threshold, np.nan)
 

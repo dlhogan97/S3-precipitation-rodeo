@@ -20,6 +20,9 @@ if __name__ == "__main__":
     sos_ds = sos_ds.where(sos_ds>0, 0)
     sail_squire_ds = xr.open_dataset(f'{DATA_PATH}SAIL/squire_30min.nc').sel(site='kettle_ponds').sortby('time').squeeze()
     
+    MIN = 0.05  # minimum measurable precipitation
+    MAX = 28.44  # 100-year event over 30 minutes
+    
     # merge kettle ponds datasets
     print('Merging Kettle Ponds datasets...')
     try:
@@ -50,8 +53,9 @@ if __name__ == "__main__":
 
     # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 28.44 mm (100-year event over 30 minutes)
     for var in kettle_ponds_combined_ds.data_vars:
-        kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] >= 0) & (kettle_ponds_combined_ds[var] <= 28.44), np.nan)
-    print('Bad data removed.')
+        kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] <= MAX), np.nan)
+        kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where(kettle_ponds_combined_ds[var] >= MIN, 0)
+    print('Maximum and minimum thresholds applied to Kettle Ponds data.')
 
     # Save the merged dataset
     output_filepath = f'{DATA_PATH}final/kettle_ponds_precipitation_30min.nc'

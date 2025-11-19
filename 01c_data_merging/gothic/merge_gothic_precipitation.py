@@ -54,13 +54,15 @@ if __name__ == "__main__":
     gothic_combined_ds = gothic_combined_ds.rename(variable_renames)
 
     # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 50 mm
-    MIN = 0
+    MIN = 0.05  # minimum measurable precipitation
     MAX = 28.44  # 100-year event over 30 minutes
     for var in gothic_combined_ds.data_vars:
         if var == 'billy_barr_precip':
-            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] >= MIN) & (gothic_combined_ds[var] <= 15), np.nan)
+            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] <= 15), np.nan)
+            gothic_combined_ds[var] = gothic_combined_ds[var].where(gothic_combined_ds[var] >= MIN, 0)
         else:
-            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] >= MIN) & (gothic_combined_ds[var] <= MAX), np.nan)
+            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] <= MAX), np.nan)
+            gothic_combined_ds[var] = gothic_combined_ds[var].where(gothic_combined_ds[var] >= MIN, 0)
     print('Bad data removed.')
 
     # Save the merged dataset

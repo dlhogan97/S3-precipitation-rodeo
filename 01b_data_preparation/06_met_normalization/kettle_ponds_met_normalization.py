@@ -72,7 +72,7 @@ def calc_normalized_df(df, deltaD_df, daily_means, daily_stds):
 
 if __name__ == "__main__":
     DATA_DIR = "/storage/dlhogan/precipitation-rodeo/data"
-    OUTPUT_DIR = f"{DATA_DIR}/processed/kettle_ponds"
+    OUTPUT_DIR = f"{DATA_DIR}/processed/final"
     WINDOW_SIZE = 7  # days
     # Define constants
     billyBarrLongTermMet_ds = xr.open_dataset(f"{DATA_DIR}/processed/billy_barr/billy_barr_20011001-20251025_30min.nc")

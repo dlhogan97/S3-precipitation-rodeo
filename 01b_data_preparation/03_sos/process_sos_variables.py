@@ -31,8 +31,8 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min',
         swe_diff = sub_ds[var].diff(dim='time')
         large_diff_mask = np.abs(swe_diff) > reasonable_threshold  # threshold of 30 mm
         # set the value after the large diff to NaN
-        indices_to_nan = large_diff_mask.where(large_diff_mask, drop=True).time
-        sub_ds[var] = sub_ds[var].where(~sub_ds['time'].isin(indices_to_nan), np.nan)
+        indices_to_nan_large = large_diff_mask.where(large_diff_mask, drop=True).time
+        sub_ds[var] = sub_ds[var].where(~sub_ds['time'].isin(indices_to_nan_large), np.nan)
         # bfill again
         sub_ds[var] = sub_ds[var].bfill(dim='time')
         # create a new variable called var + '_max_accum_swe'

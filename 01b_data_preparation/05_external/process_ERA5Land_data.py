@@ -56,7 +56,7 @@ if __name__ == "__main__":
     era5_land_point = era5_land_point.drop_vars(['valid_time', 'number', 'expver'])
 
     # save to netcdf
-    os.makedirs(f"{data_dir}/processed/ERA5-Land/", exist_ok=True)
-    output_path = f"{data_dir}/processed/ERA5-Land/era5_land_gothic_1hr.nc"
+    os.makedirs(f"{data_dir}/processed/final/ERA5-Land/", exist_ok=True)
+    output_path = f"{data_dir}/processed/final/ERA5-Land/era5_land_gothic_1hr.nc"
     era5_land_point.to_netcdf(output_path)
     print(f"Saved processed ERA5-Land data to {output_path}")
