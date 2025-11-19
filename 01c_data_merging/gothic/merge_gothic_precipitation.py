@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 50 mm
     MIN = 0
-    MAX = 50
+    MAX = 28.44  # 100-year event over 30 minutes
     for var in gothic_combined_ds.data_vars:
         if var == 'billy_barr_precip':
             gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] >= MIN) & (gothic_combined_ds[var] <= 15), np.nan)

@@ -48,9 +48,9 @@ if __name__ == "__main__":
     to_drop = ['snow_rate_ws88diw','snow_rate_m2009_1','snow_rate_m2009_2','snow_rate_ws2012',]
     kettle_ponds_combined_ds = kettle_ponds_combined_ds.drop_vars(to_drop, errors='ignore')
 
-    # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 50 mm
+    # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 28.44 mm (100-year event over 30 minutes)
     for var in kettle_ponds_combined_ds.data_vars:
-        kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] >= 0) & (kettle_ponds_combined_ds[var] <= 50), np.nan)
+        kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] >= 0) & (kettle_ponds_combined_ds[var] <= 28.44), np.nan)
     print('Bad data removed.')
 
     # Save the merged dataset
