@@ -26,13 +26,24 @@ def process_billy_barr_data(df, reasonable_threshold=None):
     non_flg_vars = [var for var in vars_to_keep if not var.startswith("flg_")]
     non_flg_vars.remove("date")
     non_flg_vars.remove("time")
+    # create flag for missing precip values, missing True, else False
+    precip_missing_flag = df['precip_mm'].isin([-9999, -9999.0, np.nan]).copy()
+    precip_missing_flag.name = 'precip_missing_flag'
 
     # zip flag and non-flag variables together
     for non_flg_var, flg_var in zip(non_flg_vars, flg_vars):
         # set non-flag variable to NaN where flag variable is not 0
         df[non_flg_var] = df[non_flg_var].where(df[flg_var].isin([0,'E','0']), np.nan)
+    
+    # create mask for bad precip values
+    precip_bad_flag = df['flg_precip'].where(df['flg_precip'].isin([0,'E','0']), True).copy()
+    # replace values in precip_flag: 0 or '0' or 'E' -> False, anything else -> True
+    precip_bad_flag = precip_bad_flag.where(precip_bad_flag == True, False)
+    precip_bad_flag.name = 'precip_bad_flag'
 
     sub_df = df[vars_to_keep]
+    # add precip_flag back to sub_df
+    sub_df = pd.concat([sub_df, precip_bad_flag, precip_missing_flag], axis=1)
     # make the index the combination of date and time
     sub_df.index = pd.to_datetime(sub_df['date'] + ' ' + sub_df['time'])
     sub_df = sub_df.drop(columns=['date', 'time'])
@@ -43,14 +54,15 @@ def process_billy_barr_data(df, reasonable_threshold=None):
     # replace -9999.9 with NaN in all columns except flag columns
     for col in sub_df.columns:
         if col not in flg_vars:
-            sub_df[col] = sub_df[col].replace(-9999.0, np.nan)
-
+            sub_df[col] = sub_df[col].where(sub_df[col] != -9999.9, np.nan)
+                
     # drop flag columns
     sub_df = sub_df.drop(columns=flg_vars)
 
     # apply reasonablness threshold 
     if reasonable_threshold is not None:
         sub_df['precip_mm'] = sub_df['precip_mm'].where(sub_df['precip_mm'] <= reasonable_threshold, np.nan)
+        sub_df['precip_bad_flag'] = sub_df['precip_bad_flag'].where(sub_df['precip_mm'] <= reasonable_threshold, True)
     # resample to 30 min intervals
     sub_df_30min = sub_df.resample('30min').agg(
         {
@@ -62,6 +74,8 @@ def process_billy_barr_data(df, reasonable_threshold=None):
             'relHumidty_%': 'mean',
             'baromPress_mbar': 'mean',
             'precip_mm': 'sum',
+            'precip_bad_flag': 'max',  # if any True in interval, result is True
+            'precip_missing_flag': 'max',  # if any True in interval, result is True
         }
     )
 
@@ -81,6 +95,8 @@ def process_billy_barr_data(df, reasonable_threshold=None):
         'relHumidty_%': 'relHumidty',
         'baromPress_mbar': 'baromPress',
         'precip_mm': 'precip',
+        'precip_bad_flag': 'precip_bad_flag',
+        'precip_missing_flag': 'precip_missing_flag',
     }
     for old_name, new_name in var_rename_dict.items():
         ds_30min = ds_30min.rename({old_name: new_name})
@@ -97,6 +113,10 @@ def process_billy_barr_data(df, reasonable_threshold=None):
             ds_30min[new_name].attrs['units'] = 'mm'
         elif old_name.endswith('_%'):
             ds_30min[new_name].attrs['units'] = '%'
+    
+    # precip_flag attributes
+    ds_30min['precip_bad_flag'].attrs['description'] = 'Quality flag for precipitation data: True = bad data, False = good data'
+    ds_30min['precip_missing_flag'].attrs['description'] = 'Quality flag for precipitation data: True = missing data, False = data present'
 
     # add lat, lon, alt variables
     ds_30min['lat'] = 38.963
@@ -123,7 +143,7 @@ if __name__ == "__main__":
     for dates in file_dates:
         # access the data file (will need to suppl this file)
         try:
-            df = pd.read_csv(f"{DATA_PATH}/raw/billy-barr/billy-barr-{dates}-colsAdjusted.csv",)
+            df = pd.read_csv(f"{DATA_PATH}/raw/billy-barr/billy-barr-{dates}-colsAdjusted.csv", low_memory=False)
         except FileNotFoundError:
             print(f"File for dates {dates} not found. Check for correct data path. Skipping.")
             continue
@@ -135,3 +155,4 @@ if __name__ == "__main__":
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         ds_30min.to_netcdf(output_path)
         ds_30min.close()
+        print(f"Processed data, saved to {output_path}")

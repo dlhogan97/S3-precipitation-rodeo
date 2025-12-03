@@ -27,6 +27,17 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
         # convert to local time
         ds = convert_to_local_time(ds, local_tz='America/Denver')
 
+        # add a qc_missing and qc_bad flag for first squire variable
+        first_var = list(ds.data_vars)[0]
+        qc_missing = ds[first_var].isnull()
+        qc_missing.name = 'squire_missing_flag'
+        qc_missing.attrs['description'] = 'Quality flag for SQUIRE data: True = missing data, False = data present'
+        qc_bad = ds[first_var].where(ds[first_var] < reasonable_threshold, np.nan).isnull()
+        qc_bad.name = 'squire_bad_flag'
+        qc_bad.attrs['description'] = 'Quality flag for SQUIRE data: True = bad data, False = good data'
+        ds = ds.where(ds[first_var] < reasonable_threshold, np.nan)
+        ds = xr.merge([ds, qc_missing, qc_bad], join='left')
+
         # grab the nearest point to gothic
         ds_gothic = ds.sel(lon=gothic_point_info['longitude'].values
                             , lat=gothic_point_info['latitude'].values, method='nearest').squeeze()

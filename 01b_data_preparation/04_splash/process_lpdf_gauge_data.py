@@ -43,9 +43,12 @@ def process_lpdf_data(file, reasonable_threshold=None):
     ]
     sub_df = sub_df[~sub_df.index.isin(dst_transition_times)]
     
+    sub_df['qc_missing_precip'] = sub_df['Precip_mm'].isna().astype(int)
+    sub_df['qc_bad_precip'] = 0  # placeholder for bad precip flag
     # apply reasonableness threshold
     if reasonable_threshold is not None:
         sub_df['Precip_mm'] = sub_df['Precip_mm'].where(sub_df['Precip_mm'] <= reasonable_threshold, float('nan'))
+        sub_df['qc_bad_precip'] = ((sub_df['Precip_mm'] > reasonable_threshold)).astype(int)
     
     # set time zone
     # sub_df.index = sub_df.index.tz_localize('America/Denver', nonexistent='NaT', ambiguous='NaT')
@@ -64,7 +67,7 @@ if __name__ == "__main__":
     
     df_list = []
     for file in files:
-        df = process_lpdf_data(file)
+        df = process_lpdf_data(file, reasonable_threshold=REASONABLE_THRESHOLD)
         df_list.append(df)
 
     # concatenate all dataframes
@@ -79,6 +82,8 @@ if __name__ == "__main__":
     # add variable attributes
     ds['prcp'].attrs['units'] = 'mm'
     ds['prcp'].attrs['long_name'] = 'LPDF Gauge Precipitation'
+    ds['qc_missing_precip'].attrs['long_name'] = 'Quality Control Flag for Missing Precipitation'
+    ds['qc_bad_precip'].attrs['long_name'] = 'Quality Control Flag for Bad Precipitation (Exceeds Reasonable Threshold)'
 
     # add global attributes
     ds.attrs['timezone'] = 'America/Denver (MST/MDT)'

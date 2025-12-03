@@ -25,7 +25,23 @@ def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonabl
     """
     print(f"Processing file: {file}")
     ds = process_sail_data.initial_sail_processing(file, vars_to_keep=vars_to_keep)
+    ds['time'] = ds.indexes['time'].tz_localize(None)
 
+    qc_pluvio_missing = ds['accum_nrt'].isnull()
+    qc_pluvio_missing.name = 'pluvio_missing_flag'
+    qc_pluvio_missing.attrs['description'] = 'Quality flag for Pluvio data: True = missing data, False = data present'
+
+    qc_pluvio_bad = ds['maintenance_flag'].where(
+        (ds['maintenance_flag'] == 0)
+        & (ds['reset_flag'] == 0)
+        & (ds['pluvio_status'] == 0)
+        & (ds['heater_status'] == 0)
+        & (ds['accum_nrt'] < reasonableness_max), # 100-year threshold
+        np.nan
+    ).isnull()
+    qc_pluvio_bad.name = 'pluvio_bad_flag'
+    qc_pluvio_bad.attrs['description'] = 'Quality flag for Pluvio data: True = bad data, False = good data'
+    
     # fill times with 0 when maintenance_flag > 0
     ds = ds.where(
     (ds['maintenance_flag'] == 0)
@@ -45,6 +61,17 @@ def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonabl
     # rate variables: mean
     intensity_rt_da = ds['intensity_rt'].resample(time=resample_interval).mean()
     intensity_rtnrt_da = ds['intensity_rtnrt'].resample(time=resample_interval).mean()
+    # flag variables: if greater than 25% of data in interval is missing/bad, flag as True
+    qc_pluvio_missing_da = qc_pluvio_missing.resample(time=resample_interval).sum()
+    qc_pluvio_bad_da = qc_pluvio_bad.resample(time=resample_interval).sum()
+    n_counts = ds['intensity_rt'].resample(time=resample_interval).count()
+    qc_pluvio_missing_da = (qc_pluvio_missing_da / n_counts) > 0.25
+    qc_pluvio_bad_da = (qc_pluvio_bad_da / n_counts) > 0.25
+
+    # add name
+    qc_pluvio_missing_da.name = 'pluvio_missing_flag'
+    qc_pluvio_bad_da.name = 'pluvio_bad_flag'
+
     # first value for lat, lon, alt
     lat_da = ds['lat'].resample(time=resample_interval).first()
     lon_da = ds['lon'].resample(time=resample_interval).first()
@@ -55,6 +82,8 @@ def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonabl
     ds_merged = xr.merge([
         accum_rtnrt_da,
         accum_nrt_da,
+        qc_pluvio_missing,
+        qc_pluvio_bad,
         accum_total_nrt_da,
         intensity_rt_da,
         intensity_rtnrt_da,
@@ -62,6 +91,7 @@ def process_pluvio_data(file, vars_to_keep, resample_interval='30min', reasonabl
         lon_da,
         alt_da
     ])
+    # Convert timezone-aware times to UTC and make them naive
     
     return ds_merged
 
@@ -108,8 +138,7 @@ if __name__ == "__main__":
 
     # concatenate all processed datasets along the time dimension
     ds_all = xr.concat(processed_datasets, dim='time')
-    # Convert timezone-aware times to UTC and make them naive
-    ds_all['time'] = ds_all.indexes['time'].tz_localize(None)
+    
     # drop duplicate times if any
     _, index = np.unique(ds_all['time'], return_index=True)
     ds_all = ds_all.isel(time=index)

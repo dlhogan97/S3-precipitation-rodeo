@@ -12,11 +12,6 @@ import numpy as np
 from scipy import stats
 import pandas as pd
 
-# Assign data directory and get files
-SITE_NAME = "gothic"
-data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
-files = glob.glob(f"{data_dir}raw/SAIL/laser_disdrometer_{SITE_NAME}/*.nc")
-
 parsivel_correction_dict = { 
     'holroyd1971': [0.17, -1],
     'brandes2007': [0.178, -0.922],
@@ -94,14 +89,32 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
     ds.close()
 
     ### 3. filter out any bad data
+    # create precip_flag for data
+    precip_missing_flag = ds_sub['qc_precip_rate'].where(ds_sub['qc_precip_rate'].isin([0,2,3]), True).copy()
+    precip_bad_flag = ds_sub['qc_precip_rate'].where(ds_sub['qc_precip_rate'].isin([0,1]), True).copy()
+    # fill all else with False
+    precip_missing_flag = precip_missing_flag.where(precip_missing_flag == True, False)
+    precip_bad_flag = precip_bad_flag.where(precip_bad_flag == True, False)
+    # anywhere that precip_rate is NaN, set missing flag to True
+    precip_missing_flag = precip_missing_flag.where(~ds_sub['precip_rate'].isnull(), True)
+    # name the flags
+    precip_missing_flag.name = 'precip_missing_flag'
+    precip_bad_flag.name = 'precip_bad_flag'
+    # add flags back to dataset
+    ds_sub = xr.merge([ds_sub, precip_missing_flag, precip_bad_flag])
+    
+    # loop through variables and apply qc
     for var in ds_sub.data_vars:
         if 'qc' in var:
             data_var = var.replace('qc_', '')
             # drop replace values with NaN where qc is not 0
             ds_sub[data_var] = ds_sub[data_var].where(ds_sub[var] == 0, np.nan)
+
     # replace unreasonable precip rates with NaN
     if reasonable_threshold is not None:
         ds_sub['precip_rate'] = ds_sub['precip_rate'].where(ds_sub['precip_rate'] <= reasonable_threshold, np.nan)
+        # update precip_flag accordingly
+        ds_sub['precip_bad_flag'] = ds_sub['precip_bad_flag'].where(ds_sub['precip_rate'] <= reasonable_threshold, True)
     #  4. calculate correction for snow using all methods (save these as individual arrays)
     precip_rate_uncorrected = ds_sub['precip_rate']
     precip_rate_holroyd = correct_SAIL_parsivel_for_snow(ds_sub, 'holroyd1971')
@@ -166,6 +179,17 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
     # median variables:
     median_volume_diameter_da = ds_sub['median_volume_diameter'].resample(time=resample_interval).median()
 
+    # # flag variables: if greater than 25% of data in interval is missing/bad, flag as True
+    n_counts = ds_sub['precip_rate'].resample(time=resample_interval).count()
+    precip_missing_flag_da = (ds_sub['precip_missing_flag'].resample(time=resample_interval).sum() / n_counts) > 0.25
+    precip_bad_flag_da = (ds_sub['precip_bad_flag'].resample(time=resample_interval).sum() / n_counts) > 0.25
+    # add name
+    precip_missing_flag_da.name = 'precip_missing_flag'
+    precip_bad_flag_da.name = 'precip_bad_flag'
+    # add flag attributes
+    precip_missing_flag_da.attrs['description'] = 'Quality flag for precipitation data: True = missing data, False = data present'
+    precip_bad_flag_da.attrs['description'] = 'Quality flag for precipitation data: True = bad data, False = good data'
+
     # lon, lat, alt: take first value
     lon_da = ds_sub['lon'].resample(time=resample_interval).first()
     lat_da = ds_sub['lat'].resample(time=resample_interval).first()
@@ -179,6 +203,8 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
         precip_accum_heymsfield_da,
         number_detected_particles_da,
         precip_rate_da,
+        precip_missing_flag_da,
+        precip_bad_flag_da,
         equivalent_radar_reflectivity_ott_da,
         class_size_width_da,
         fall_velocity_calculated_da,

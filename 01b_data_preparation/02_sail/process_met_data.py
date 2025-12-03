@@ -52,13 +52,67 @@ def process_met_data(file, vars_to_keep, resample_interval='30min', reasonable_t
     xarray.Dataset: Processed dataset.
     """
     print(f"Processing file: {file}")
+    precip_vars_to_qc = [
+        "qc_pwd_precip_rate_mean_1min",
+        "qc_org_precip_rate_mean",
+        "qc_tbrg_precip_total",
+    ]
+    qc_ds = xr.open_dataset(file)[precip_vars_to_qc]
+    qc_pwd_missing = qc_ds['qc_pwd_precip_rate_mean_1min'].where(qc_ds['qc_pwd_precip_rate_mean_1min'].isin([0,2,3]), True).copy()
+    qc_org_missing = qc_ds['qc_org_precip_rate_mean'].where(qc_ds['qc_org_precip_rate_mean'].isin([0,2,3]), True).copy()
+    qc_tbrg_missing = qc_ds['qc_tbrg_precip_total'].where(qc_ds['qc_tbrg_precip_total'].isin([0,2,3]), True).copy()
+    qc_pwd_bad = qc_ds['qc_pwd_precip_rate_mean_1min'].where(qc_ds['qc_pwd_precip_rate_mean_1min'].isin([0,1]), True).copy()
+    qc_org_bad = qc_ds['qc_org_precip_rate_mean'].where(qc_ds['qc_org_precip_rate_mean'].isin([0,1]), True).copy()
+    qc_tbrg_bad = qc_ds['qc_tbrg_precip_total'].where(qc_ds['qc_tbrg_precip_total'].isin([0,1]), True).copy()
+
+    # fill all else with False
+    qc_pwd_missing = qc_pwd_missing.where(qc_pwd_missing == True, False)
+    qc_org_missing = qc_org_missing.where(qc_org_missing == True, False)
+    qc_tbrg_missing = qc_tbrg_missing.where(qc_tbrg_missing == True, False)
+    qc_pwd_bad = qc_pwd_bad.where(qc_pwd_bad == True, False)
+    qc_org_bad = qc_org_bad.where(qc_org_bad == True, False)
+    qc_tbrg_bad = qc_tbrg_bad.where(qc_tbrg_bad == True, False)
+
+    # anywhere that precip_rate is NaN, set missing flag to True
+    qc_pwd_missing = qc_pwd_missing.where(~qc_ds['qc_pwd_precip_rate_mean_1min'].isnull(), True)
+    qc_org_missing = qc_org_missing.where(~qc_ds['qc_org_precip_rate_mean'].isnull(), True)
+    qc_tbrg_missing = qc_tbrg_missing.where(~qc_ds['qc_tbrg_precip_total'].isnull(), True)
+
+    # name the flags
+    qc_pwd_missing.name = 'pwd_precip_missing_flag'
+    qc_org_missing.name = 'org_precip_missing_flag'
+    qc_tbrg_missing.name = 'tbrg_precip_missing_flag'
+    qc_pwd_bad.name = 'pwd_precip_bad_flag'
+    qc_org_bad.name = 'org_precip_bad_flag'
+    qc_tbrg_bad.name = 'tbrg_precip_bad_flag'
+
+    # convert all to local time and subset to vars to keep
+    for d in [qc_pwd_bad, qc_org_bad, qc_tbrg_bad,
+              qc_pwd_missing, qc_org_missing, qc_tbrg_missing]:
+        try:
+            d = convert_to_local_time(d, local_tz='America/Denver')
+            # Convert timezone-aware times to UTC and make them naive
+            d['time'] = d.indexes['time'].tz_localize(None)
+        except Exception as e:
+            print(f"Error converting to local time: {e}")
+
+    # process sail data
     ds = process_sail_data.initial_sail_processing(file, vars_to_keep=vars_to_keep)
-    
+    # Convert timezone-aware times to UTC and make them naive
+    ds['time'] = ds.indexes['time'].tz_localize(None)
+    # add qc flags to dataset
+    ds = xr.merge([ds, qc_pwd_missing, qc_org_missing, qc_tbrg_missing,
+                   qc_pwd_bad, qc_org_bad, qc_tbrg_bad])
     # create accumulated variables
     org_precip_accum = ds["org_precip_rate_mean"] / 60
     org_precip_accum.name = "org_precip_accum"
     org_precip_accum.attrs["units"] = "mm"
-    org_precip_accum.attrs["long_name"] = "Original Precipitation Accumulation"
+    org_precip_accum.attrs["long_name"] = "Optical Rain Gauge Precipitation Accumulation"
+
+    pwd_precip_total = ds["pwd_precip_rate_mean_1min"] / 60
+    pwd_precip_total.name = "pwd_precip_total"
+    pwd_precip_total.attrs["units"] = "mm"
+    pwd_precip_total.attrs["long_name"] = "Precipitation accumulation from Present Weather Detector"
 
     if reasonable_threshold is not None:
         ds['org_precip_rate_mean'] = ds['org_precip_rate_mean'].where(ds['org_precip_rate_mean'] <= reasonable_threshold, np.nan)
@@ -77,10 +131,8 @@ def process_met_data(file, vars_to_keep, resample_interval='30min', reasonable_t
     # resample to desired length
     # accumulated variables: sum
     org_precip_accum_da = org_precip_accum.resample(time=resample_interval).sum()
-    pwd_cumul_rain_da = (ds['pwd_cumul_rain'].where(ds['pwd_cumul_rain'] < reasonable_threshold, np.nan)).resample(time=resample_interval).sum()
-    pwd_cumul_snow_da = ds['pwd_cumul_snow'].resample(time=resample_interval).sum()
+    pwd_precip_total_da = pwd_precip_total.resample(time=resample_interval).sum()
     tbrg_precip_total_da = ds['tbrg_precip_total'].where(ds['tbrg_precip_total'] < reasonable_threshold, np.nan).resample(time=resample_interval).sum()
-    tbrg_precip_total_corr_da = ds['tbrg_precip_total_corr'].resample(time=resample_interval).sum()
 
     # mean variables: mean
     atmos_pressure_da = ds['atmos_pressure'].resample(time=resample_interval).mean()
@@ -100,19 +152,46 @@ def process_met_data(file, vars_to_keep, resample_interval='30min', reasonable_t
         warnings.filterwarnings("ignore")
         wdir_vec_mean_da = ((10 * np.round(ds['wdir_vec_mean'] / 10)).astype(int)).resample(time=resample_interval).reduce(xr_mode)
         pwd_err_code_da = (ds['pwd_err_code'].fillna(0)).resample(time=resample_interval).reduce(xr_mode)
-        pwd_mean_vis_1min_da = ds['pwd_mean_vis_1min'].resample(time=resample_interval).reduce(xr_mode)
+
+    # flag variables: if greater than 25% of data in interval is missing/bad, flag as True
+    pwd_precip_missing_flag_da = ds['pwd_precip_missing_flag'].resample(time=resample_interval).sum()
+    org_precip_missing_flag_da = ds['org_precip_missing_flag'].resample(time=resample_interval).sum()
+    tbrg_precip_missing_flag_da = ds['tbrg_precip_missing_flag'].resample(time=resample_interval).sum()
+    pwd_precip_bad_flag_da = ds['pwd_precip_bad_flag'].resample(time=resample_interval).sum()
+    org_precip_bad_flag_da = ds['org_precip_bad_flag'].resample(time=resample_interval).sum()
+    tbrg_precip_bad_flag_da = ds['tbrg_precip_bad_flag'].resample(time=resample_interval).sum()
+
+    n_counts = ds['org_precip_rate_mean'].resample(time=resample_interval).count()
+    pwd_precip_missing_flag_da = (pwd_precip_missing_flag_da / n_counts) > 0.25
+    org_precip_missing_flag_da = (org_precip_missing_flag_da / n_counts) > 0.25
+    tbrg_precip_missing_flag_da = (tbrg_precip_missing_flag_da / n_counts) > 0.25
+    pwd_precip_bad_flag_da = (pwd_precip_bad_flag_da / n_counts) > 0.25
+    org_precip_bad_flag_da = (org_precip_bad_flag_da / n_counts) > 0.25
+    tbrg_precip_bad_flag_da = (tbrg_precip_bad_flag_da / n_counts) > 0.25
+
+    pwd_precip_missing_flag_da.name = 'pwd_precip_missing_flag'
+    org_precip_missing_flag_da.name = 'org_precip_missing_flag'
+    tbrg_precip_missing_flag_da.name = 'tbrg_precip_missing_flag'
+    pwd_precip_bad_flag_da.name = 'pwd_precip_bad_flag'
+    org_precip_bad_flag_da.name = 'org_precip_bad_flag'
+    tbrg_precip_bad_flag_da.name = 'tbrg_precip_bad_flag'
 
     # first value for lat, lon, alt
     lat_da = ds['lat'].resample(time=resample_interval).first()
     lon_da = ds['lon'].resample(time=resample_interval).first()
     alt_da = ds['alt'].resample(time=resample_interval).first()
+
     # merge all data arrays
     ds_merged = xr.merge([
         org_precip_accum_da,
-        pwd_cumul_rain_da,
-        pwd_cumul_snow_da,
+        org_precip_missing_flag_da,
+        org_precip_bad_flag_da,
+        pwd_precip_total_da,
+        pwd_precip_missing_flag_da,
+        pwd_precip_bad_flag_da,
         tbrg_precip_total_da,
-        tbrg_precip_total_corr_da,
+        tbrg_precip_missing_flag_da,
+        tbrg_precip_bad_flag_da,
         atmos_pressure_da,
         temp_mean_da,
         rh_mean_da,
@@ -124,11 +203,12 @@ def process_met_data(file, vars_to_keep, resample_interval='30min', reasonable_t
         org_precip_rate_mean_da,
         wdir_vec_mean_da,
         pwd_err_code_da,
-        pwd_mean_vis_1min_da,
         lat_da,
         lon_da,
         alt_da
     ])
+
+
     ds.close()
     return ds_merged
 
@@ -141,9 +221,9 @@ if __name__ == "__main__":
     REASONABLE_THRESHOLD = 0.522 * 25.4  # reasonable threshold for precipitation
     vars_to_keep = [
     'atmos_pressure','temp_mean','rh_mean','vapor_pressure_mean',
-    'wspd_vec_mean','wdir_vec_mean','pwd_err_code','pwd_mean_vis_1min',
-    'pwd_precip_rate_mean_1min','pwd_cumul_rain','pwd_cumul_snow',
-    'org_precip_rate_mean','tbrg_precip_total','tbrg_precip_total_corr',
+    'wspd_vec_mean','wdir_vec_mean',
+    'pwd_err_code','pwd_precip_rate_mean_1min',
+    'org_precip_rate_mean','tbrg_precip_total',
     'lat','lon','alt',
     ]
 

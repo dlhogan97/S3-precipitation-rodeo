@@ -25,6 +25,12 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min',
 
     # for SWE_ variables, bfill NaN values
     for var in swe_vars:
+        qc_missing = sub_ds[var].isnull()
+        qc_missing.name = 'qc_' + var + '_missing'
+
+        qc_missing.attrs['description'] = f'Quality flag for {var} data: True = missing data, False = data present'
+        sub_ds = xr.merge([sub_ds, qc_missing], join='left')
+
         # backward fill values
         sub_ds[var] = sub_ds[var].bfill(dim='time')
         # remove any values with large absolute differences between time steps
@@ -33,6 +39,10 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min',
         # set the value after the large diff to NaN
         indices_to_nan_large = large_diff_mask.where(large_diff_mask, drop=True).time
         sub_ds[var] = sub_ds[var].where(~sub_ds['time'].isin(indices_to_nan_large), np.nan)
+        qc_bad_large = sub_ds[var].isnull() & ~qc_missing.isnull()
+        qc_bad_large.name = 'qc_' + var + '_bad'
+        qc_bad_large.attrs['description'] = f'Quality flag for {var} data: True = bad data (large diff), False = good data'
+        sub_ds = xr.merge([sub_ds, qc_bad_large], join='left')
         # bfill again
         sub_ds[var] = sub_ds[var].bfill(dim='time')
         # create a new variable called var + '_max_accum_swe'
@@ -49,6 +59,8 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min',
         {
             'SWE_p1_c': 'mean', 'SWE_p2_c': 'mean', 'SWE_p3_c': 'mean', 'SWE_p4_c': 'mean',
             'SWE_p1_c_max_accum': 'mean', 'SWE_p2_c_max_accum': 'mean', 'SWE_p3_c_max_accum': 'mean', 'SWE_p4_c_max_accum': 'mean',
+            'qc_SWE_p1_c_missing': 'sum', 'qc_SWE_p2_c_missing': 'sum', 'qc_SWE_p3_c_missing': 'sum', 'qc_SWE_p4_c_missing': 'sum',
+            'qc_SWE_p1_c_bad': 'sum', 'qc_SWE_p2_c_bad': 'sum', 'qc_SWE_p3_c_bad': 'sum', 'qc_SWE_p4_c_bad': 'sum',
             'spd_2m_c': 'mean', 'dir_2m_c': fast_mode_rounded, 'u_2m_c': 'mean', 'v_2m_c': 'mean',
             'spd_3m_c': 'mean', 'dir_3m_c': fast_mode_rounded, 'u_3m_c': 'mean', 'v_3m_c': 'mean',
             'spd_10m_c': 'mean', 'dir_10m_c': fast_mode_rounded, 'u_10m_c': 'mean', 'v_10m_c': 'mean',
@@ -59,6 +71,11 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min',
             'Rpile_out_9m_d': 'mean', 'Rpile_in_9m_d': 'mean', 'Rsw_in_9m_d': 'mean', 'Rsw_out_9m_d': 'mean',
         }
     )
+    # update the qc values to be True if more than 25% of values in the interval were bad/missing
+    interval_count = 6
+    for var in swe_vars:
+        df[f'qc_{var}_missing'] = df[f'qc_{var}_missing'] > (0.25 * interval_count)
+        df[f'qc_{var}_bad'] = df[f'qc_{var}_bad'] > (0.25 * interval_count)
 
     sub_ds_30min = df.to_xarray()
 

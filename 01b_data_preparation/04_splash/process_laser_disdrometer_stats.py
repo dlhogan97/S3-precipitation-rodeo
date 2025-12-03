@@ -12,12 +12,12 @@ os.chdir("/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo/")
 
 original_storage_path = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/'
 final_storage_path = '/storage/dlhogan/precipitation-rodeo/data/processed/SPLASH/'
-if not os.path.exists(original_storage_path+'laser_disdrometer_raw_KP'):
+if not os.path.exists(original_storage_path+'laser_disdrometer_stats_KP'):
     print("Download data using ~/01a_data_access/splash/laser_disdrometer_raw_data_download.py")
 else:
     print('Data already downloaded')
     # we'll start by loading in one file and looking at the data
-    original_storage_path = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/laser_disdrometer_raw_KP/*'
+    original_storage_path = '/storage/dlhogan/precipitation-rodeo/data/raw/SPLASH/laser_disdrometer_stats_KP/*'
     files = glob.glob(original_storage_path)
 
 def process_laser_disdrometer_file(file_path, reasonable_threshold=None):
@@ -208,14 +208,6 @@ def process_laser_disdrometer_file(file_path, reasonable_threshold=None):
 
     return ds
 
-
-# %%
-parsivel_correction_dict = { 
-    'holroyd1971': [0.17, -1],
-    'brandes2007': [0.178, -0.922],
-    'heymsfield2004': [0.104, -0.95]
-}
-
 def mode_function(x):
         return x.mode().iloc[0] if not x.mode().empty else None
 def only_one(df, resampling_interval):
@@ -269,9 +261,7 @@ def resample_xarray_dataset(ds, resampling_interval):
     attrs_vars = {var: ds[var].attrs.copy() for var in ds.variables}
 
     # Define how to handle each variable
-    mean_vars = ["Rate", "Z", "SignalAvg", "SignalStdDev", "TempAvg", 
-                 "TempStdDev", "VoltAvg", "VoltStdDev", 
-                 "HeatCurrentAvg", "HeatCurrentStdDev", "particle_distribution"]
+    mean_vars = []
     sum_vars = ["Amount", "AmountSum", "NumParticle"]
     mode_vars = ["Blackout", "Good", "Bad", "NumError", "Dirty", "VeryDirty", 
                  "Damaged", "NumRain", "NumNoRain", "NumAmbig", "Type"]
