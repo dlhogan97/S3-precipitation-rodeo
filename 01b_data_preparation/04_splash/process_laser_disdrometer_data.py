@@ -627,8 +627,12 @@ def resample_stats_laser_disdrometer_data(stats_file, resample_interval='30min',
     
     stats_ds = process_stats_laser_disdrometer_file(stats_file, reasonable_threshold=reasonable_threshold)
     # create qc_bad_precip variable
-    stats_ds['qc_bad_precip'] = ((stats_ds['Bad'] != 0) |
-                           (stats_ds['Damaged'] != 0)).astype(int).astype(bool)
+    stats_ds['qc_bad_precip'] = (
+                                 (stats_ds['NumError'] > 5) |
+                                 (stats_ds['Bad'] > 0) |
+                                 (stats_ds['Amount'] < 0) |
+                                 (stats_ds['Rate'] < 0)
+                                 ).astype(int).astype(bool)
     # create qc_missing_precip variable
     stats_ds['qc_missing_precip'] = stats_ds['Amount'].isnull().astype(bool)
 
@@ -636,8 +640,8 @@ def resample_stats_laser_disdrometer_data(stats_file, resample_interval='30min',
 
     # # flag variables: if greater than 25% of data in interval is missing/bad, flag as True
     n_counts = stats_ds['Amount'].resample(time=resample_interval).count()
-    qc_missing_precip_da = ((stats_ds['qc_missing_precip'].resample(time=resample_interval).sum() / n_counts) > 0.25).astype(bool)
-    qc_bad_precip_da = ((stats_ds['qc_bad_precip'].resample(time=resample_interval).sum() / n_counts) > 0.25).astype(bool)
+    qc_missing_precip_da = ((stats_ds['qc_missing_precip'].resample(time=resample_interval).sum() / n_counts) > 0).astype(bool)
+    qc_bad_precip_da = ((stats_ds['qc_bad_precip'].resample(time=resample_interval).sum() / n_counts) > 0).astype(bool)
     # add name
     qc_missing_precip_da.name = 'qc_missing_precip'
     qc_bad_precip_da.name = 'qc_bad_precip'
@@ -654,6 +658,10 @@ def resample_stats_laser_disdrometer_data(stats_file, resample_interval='30min',
     precip_type_da = precip_type_da.where((precip_type_da > 2) | (precip_type_da < 0.5), 1)
     precip_type_da = precip_type_da.where((precip_type_da < 2), 3)
     precip_type_da = precip_type_da.where((precip_type_da > 0.5), np.nan)
+
+    # filter out any negative values in Amount and Rate
+    precip_accum_stats_da = precip_accum_stats_da.where(precip_accum_stats_da >= 0, 0)
+    precip_rate_stats_da = precip_rate_stats_da.where(precip_rate_stats_da >= 0, np.nan)
 
     precip_type_da.name = 'precip_type'
     precip_type_da.attrs['description'] = 'Precipitation type (1=rain; 2=mixed; 3=snow)'
@@ -724,6 +732,17 @@ if __name__ == "__main__":
     )
     # sort by time
     combined_ds = combined_ds.sortby('time')
+
+    # make the dataset continuous in time by reindexing to a complete time range
+    tmin = pd.Timestamp(combined_ds.time.min().item()).floor('30min')
+    tmax = pd.Timestamp(combined_ds.time.max().item()).ceil('30min')
+    full_time_index = pd.date_range(tmin, tmax, freq='30min')
+    combined_ds = combined_ds.sel(time=~combined_ds.get_index('time').duplicated())
+    combined_ds = combined_ds.reindex(time=full_time_index)
+    print("Reindexed combined dataset to full time range.")
+    # make qc_missing_precip True where combined_ds['Amount'] is nan
+    combined_ds['qc_missing_precip'] = combined_ds['Amount'].isnull().astype(int)
+    combined_ds['qc_bad_precip'] = combined_ds['qc_bad_precip'].fillna(False).astype(int)
     # save to netcdf
-    combined_ds.to_netcdf('/storage/dlhogan/precipitation-rodeo/data/processed/SPLASH/SPLASH_kp_laser_disdrometer.nc')
+    combined_ds.to_netcdf('/storage/dlhogan/precipitation-rodeo/data/processed/SPLASH/SPLASH_kp_laser_disdrometer_30min.nc')
     print("Saved combined dataset to netcdf.")
