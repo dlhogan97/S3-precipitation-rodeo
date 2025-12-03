@@ -19,8 +19,8 @@ SAIL_WIND_VARS = {
 
 SAIL_PRECIPITATION_VARS = {
     "cumulative":["pwd_cumul_rain","tbrg_precip_total","tbrg_precip_total_corr", 
-                  "rain_amount", "accum_rtnrt", "accum_nrt", "accum_total_nrt", "org_precip_accum",
-                  'rain_rate_A_total','snow_rate_m2009_1_total','snow_rate_m2009_2_total','snow_rate_ws88diw_total','snow_rate_ws2012_total'],
+                  "rain_amount", "accum_rtnrt", "accum_nrt", "accum_total_nrt", "org_precip_accum", "pwd_precip_total",
+                  'snow_rate_m2009_1_total','snow_rate_m2009_2_total','snow_rate_ws88diw_total','snow_rate_ws2012_total'],
     "duration": ["rain_duration"],
     "rate":["pwd_precip_rate_mean_1min","org_precip_rate_mean", "rain_intensity"],
     "qc":["qc_pwd_precip_rate_mean_1min","qc_pwd_cumul_rain","qc_pwd_cumul_snow","qc_org_precip_rate_mean","qc_tbrg_precip_total","qc_tbrg_precip_total_corr"],
