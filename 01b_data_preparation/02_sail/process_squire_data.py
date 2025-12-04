@@ -32,10 +32,9 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
         qc_missing = ds[first_var].isnull()
         qc_missing.name = 'squire_missing_flag'
         qc_missing.attrs['description'] = 'Quality flag for SQUIRE data: True = missing data, False = data present'
-        qc_bad = ds[first_var].where(ds[first_var] < reasonable_threshold, np.nan).isnull()
-        qc_bad.name = 'squire_bad_flag'
+        qc_bad = (ds[first_var] < reasonable_threshold).isnull()
+        qc_bad.name = 'squire_bad_flag'     
         qc_bad.attrs['description'] = 'Quality flag for SQUIRE data: True = bad data, False = good data'
-        ds = ds.where(ds[first_var] < reasonable_threshold, np.nan)
         ds = xr.merge([ds, qc_missing, qc_bad], join='left')
 
         # grab the nearest point to gothic
@@ -51,8 +50,10 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
             for var in ds_gothic.data_vars:
                 ds_gothic[var] = ds_gothic[var].where(ds_gothic[var] <= reasonable_threshold, np.nan)
                 # apply lower bound of 0.05 mm
+                ds_gothic[var] = ds_gothic[var].where(ds_gothic[var] >= 0.05, 0)
             for var in ds_kettle_ponds.data_vars:
                 ds_kettle_ponds[var] = ds_kettle_ponds[var].where(ds_kettle_ponds[var] <= reasonable_threshold, np.nan)
+                ds_kettle_ponds[var] = ds_kettle_ponds[var].where(ds_kettle_ponds[var] >= 0.05, 0)
 
         # resample to resample interval
         ds_gothic_resampled = ds_gothic.resample(time=resample_interval).mean().squeeze()

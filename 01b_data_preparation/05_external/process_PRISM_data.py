@@ -5,6 +5,7 @@ import glob
 import sys, os
 
 if __name__ == "__main__":
+    default = input("Do you want standard 2021-2023 dates? (y/n)")
     # set data directory
     data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
 
@@ -35,10 +36,14 @@ if __name__ == "__main__":
     kettle_ponds_point_info = get_point_info(example_kp_ds)
 
     # check if PRISM files are present
-    if not os.path.exists(f"{data_dir}external/PRISM/processed/"):
+    if default == "y":
+        prism_dir = f"{data_dir}external/PRISM/processed/"
+    else:
+        prism_dir = f"{data_dir}external/PRISM/processed/long_term"
+    if not os.path.exists(prism_dir):
         print("PRISM data directory not found. Download the data before proceeding.")
     try:
-        files = glob.glob(f"{data_dir}external/PRISM/processed/prism_ppt_us_30s*.nc")
+        files = glob.glob(f"{prism_dir}/prism_ppt_us_30s*.nc")
     except Exception as e:
         print(f"Error finding PRISM files: {e}")
 
@@ -65,5 +70,9 @@ if __name__ == "__main__":
             ds_all = ds_sites
 
     # save the combined dataset
-    ds_all.to_netcdf(f"{data_dir}processed/final/PRISM/prism_site_data.nc")
-    print(f"Saved PRISM site data to netcdf: {data_dir}processed/final/PRISM/prism_site_data.nc")
+    if default == 'y':
+        OUTFILE = f"{data_dir}processed/final/PRISM/prism_site_data.nc"
+    else:
+        OUTFILE = f"{data_dir}processed/final/PRISM/prism_site_longterm_data.nc"
+        ds_all.to_netcdf(OUTFILE)
+    print(f"Saved PRISM site data to netcdf: {OUTFILE}")

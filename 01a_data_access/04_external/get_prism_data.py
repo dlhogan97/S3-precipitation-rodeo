@@ -19,15 +19,6 @@ REGION = "us"
 RESOLUTION = "800m"
 DATES = [d.strftime("%Y%m%d") for d in pd.date_range("2020-01-15", "2020-01-16")]
 
-# Output directories
-BASE_DIR = Path("/storage/dlhogan/precipitation-rodeo/data/external/PRISM")
-ZIP_DIR = BASE_DIR / "raw_zip"
-OUT_DIR = BASE_DIR / "raw"
-
-# Ensure directories exist
-ZIP_DIR.mkdir(parents=True, exist_ok=True)
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-
 # Base URL template
 BASE_URL = "https://services.nacse.org/prism/data/get/{region}/{res}/{element}/{date}?format=nc"
 
@@ -136,16 +127,50 @@ def clip_prism(raster_path, shape_path):
 # ==========================
 if __name__ == "__main__":
     print("🚀 Starting PRISM download + extraction pipeline...")
-    DATES = [d.strftime("%Y%m%d") for d in pd.date_range("2021-11-01", "2023-09-30")]
     # Define shapefile path
-    SHAPE_PATH = "/storage/dlhogan/precipitation-rodeo/data/geographic/East_River_lumped_HRUs_GRUs.shp"
+    HOME_PATH = "/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo/01a_data_access/geodata/" # UPDATE
+    SHAPE_PATH = f"{HOME_PATH}East_River_lumped_HRUs_GRUs.shp"
     RESOLUTION_MAP = {"800m": "30s", "4km":"120s"}
-    for element in ELEMENTS:
-        for date in DATES:
-            zip_path = download_prism_data(element, date)
-            if zip_path:
-                extracted_nc = extract_nc_from_zip(zip_path, OUT_DIR)
-            if extracted_nc:
-                clip_prism(f"{OUT_DIR}/prism_{element}_{REGION}_{RESOLUTION_MAP[RESOLUTION]}_{date}.nc", SHAPE_PATH)
+    # Output directories
+    BASE_DIR = Path("/storage/dlhogan/precipitation-rodeo/data/external/PRISM")
+    ZIP_DIR = BASE_DIR / "raw_zip"
+    OUT_DIR = BASE_DIR / "raw"
 
+    # Ensure directories exist
+    ZIP_DIR.mkdir(parents=True, exist_ok=True)
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    default = input("Do you want standard 2021-2023 dates? (y/n): ")
+    if default == 'y':
+        DATES = [d.strftime("%Y%m%d") for d in pd.date_range("2021-11-01", "2023-09-30")]
+        for element in ELEMENTS:
+            for date in DATES:
+                if os.path.exists(f"{BASE_DIR}/processed/prism_{element}_{REGION}_{RESOLUTION_MAP[RESOLUTION]}_{date}_clipped.nc"):
+                    continue
+                zip_path = download_prism_data(element, date)
+                if zip_path:
+                    extracted_nc = extract_nc_from_zip(zip_path, OUT_DIR)
+                if extracted_nc:
+                    clip_prism(f"{OUT_DIR}/prism_{element}_{REGION}_{RESOLUTION_MAP[RESOLUTION]}_{date}.nc", SHAPE_PATH)
+    else: 
+        START_DATE = input("Input start date (YYYY-MM-DD): ")
+        END_DATE = input("Input start date (YYYY-MM-DD): ")
+        DATES = [d.strftime("%Y%m%d") for d in pd.date_range(START_DATE, END_DATE)]
+        # Output directories
+        BASE_DIR = Path("/storage/dlhogan/precipitation-rodeo/data/external/PRISM/long_term")
+        ZIP_DIR = BASE_DIR / "raw_zip"
+        OUT_DIR = BASE_DIR / "raw"
+
+        # Ensure directories exist
+        ZIP_DIR.mkdir(parents=True, exist_ok=True)
+        OUT_DIR.mkdir(parents=True, exist_ok=True)
+        for element in ELEMENTS:
+            for date in DATES:
+                if os.path.exists(f"{BASE_DIR}/processed/long_term/prism_{element}_{REGION}_{RESOLUTION_MAP[RESOLUTION]}_{date}_clipped.nc"):
+                    continue
+                zip_path = download_prism_data(element, date)
+                if zip_path:
+                    extracted_nc = extract_nc_from_zip(zip_path, OUT_DIR)
+                if extracted_nc:
+                    clip_prism(f"{OUT_DIR}/prism_{element}_{REGION}_{RESOLUTION_MAP[RESOLUTION]}_{date}.nc", SHAPE_PATH)
     print("\n✅ All downloads and extractions complete!")
+

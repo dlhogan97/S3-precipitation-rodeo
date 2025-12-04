@@ -25,9 +25,7 @@ def process_lpdf_data(file, reasonable_threshold=None):
 
     # Reindex to fill any gaps
     sub_df = sub_df.reindex(full_index)
-
-    # backfill missing values
-    sub_df['Precip_mm'] = sub_df['Precip_mm'].bfill()
+    sub_df['qc_missing_precip'] = sub_df['Precip_mm'].isna().astype(int)
 
     # drop duplicates
     sub_df = sub_df[~sub_df.index.duplicated(keep='first')]
@@ -42,8 +40,7 @@ def process_lpdf_data(file, reasonable_threshold=None):
         pd.Timestamp('2023-11-05 01:00:00'),
     ]
     sub_df = sub_df[~sub_df.index.isin(dst_transition_times)]
-    
-    sub_df['qc_missing_precip'] = sub_df['Precip_mm'].isna().astype(int)
+    # create qc flags
     sub_df['qc_bad_precip'] = 0  # placeholder for bad precip flag
     # apply reasonableness threshold
     if reasonable_threshold is not None:
