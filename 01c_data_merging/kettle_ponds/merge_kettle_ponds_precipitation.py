@@ -38,7 +38,9 @@ if __name__ == "__main__":
                                                                 'SWE_p4_c_max_accum', 'qc_SWE_p4_c_missing', 'qc_SWE_p4_c_bad']].sortby('time')
     # rename qc variable to remove _c
     sos_ds = sos_ds.rename({var: var.replace('_c_', '_') for var in sos_ds.data_vars if 'qc_' in var})
-    sos_ds = sos_ds.where(sos_ds>0, 0)
+    # for non-qc variables, take the difference between time steps to get precipitation
+    for var in ['SWE_p1_c_max_accum', 'SWE_p2_c_max_accum', 'SWE_p3_c_max_accum', 'SWE_p4_c_max_accum']:
+        sos_ds[var] = sos_ds[var].diff(dim='time').fillna(0)
 
     # sail squire data
     sail_squire_ds = xr.open_dataset(f'{DATA_PATH}SAIL/squire_30min.nc').sel(site='kettle_ponds').sortby('time').squeeze()
@@ -66,10 +68,10 @@ if __name__ == "__main__":
                             'precip_accum_holyroyd' : 'splash_ld_holyroyd',
                             'precip_accum_brandes':'splash_ld_brandes',
                             'precip_accum_heymsfield':'splash_ld_heymsfield',
-                            'SWE_p1_c_max_accum': "sos_swe_p1",
-                            'SWE_p2_c_max_accum': "sos_swe_p2",
-                            'SWE_p3_c_max_accum': "sos_swe_p3",
-                            'SWE_p4_c_max_accum': "sos_swe_p4",
+                            'SWE_p1_c_max_accum': "sos_SWE_p1",
+                            'SWE_p2_c_max_accum': "sos_SWE_p2",
+                            'SWE_p3_c_max_accum': "sos_SWE_p3",
+                            'SWE_p4_c_max_accum': "sos_SWE_p4",
                             'snow_rate_m2009_1_total':'sail_squire_m2009_1',
                             'snow_rate_m2009_2_total':'sail_squire_m2009_2',
                             'snow_rate_ws88diw_total':'sail_squire_ws88diw',
