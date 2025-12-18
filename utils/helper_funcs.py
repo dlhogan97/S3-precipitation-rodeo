@@ -119,6 +119,134 @@ SWE_VARIABLES = [ "SWE_p1_c", "SWE_p2_c", "SWE_p3_c", "SWE_p4_c" ]
 RADIATION_VARIABLES = [
     'Rpile_out_9m_d', 'Rpile_in_9m_d', 'Rsw_in_9m_d', 'Rsw_out_9m_d'
 ]
+
+# color map
+cmap = plt.get_cmap('tab20', 15)  # 'tab20
+colors = [cmap(i) for i in range(cmap.N)]
+
+INSTRUMENT_PLOT_DICT = {
+    'billy_barr_precip':{
+        'name': 'Billy Barr Rain Gauge',
+        'color': colors[0],
+        'marker': 'o',
+        'size': 100
+    },
+    'sail_pluvio':{
+        'name': 'Pluviometer',
+        'color': colors[1],
+        'marker': 's',
+        'size': 100
+    },
+    'splash_pluvio':{
+        'name': 'Pluviometer',
+        'color': colors[1],
+        'marker': 's',
+        'size': 100
+    },
+    'sail_ld_uncorrected':{
+        'name': 'Laser Disdrometer\n(Uncorrected)',
+        'color': colors[2],
+        'marker': 'D',
+        'size': 100
+    },
+    'sail_ld_brandes':{
+        'name': 'Laser Disdrometer\n(Brandes Correction)',
+        'color': colors[3],
+        'marker': 'D',
+        'size': 100
+    },
+    'sail_ld_holyroyd':{
+        'name': 'Laser Disdrometer\n(Holyroyd Correction)',
+        'color': colors[4],
+        'marker': 'D',
+        'size': 100
+    },
+    'sail_ld_heymsfield':{
+        'name': 'Laser Disdrometer\n(Heymsfield Correction)',
+        'color': colors[5],
+        'marker': 'D',
+        'size': 100
+    },
+    'sos_SWE_p1':{
+        'name': 'Snow Pillow (1)',
+        'color': colors[6],
+        'marker': 'X',
+        'size': 100
+    },
+    'sos_SWE_p2':{
+        'name': 'Snow Pillow (2)',
+        'color': colors[6],
+        'marker': 'X',
+        'size': 100
+    },
+    'sos_SWE_p3':{
+        'name': 'Snow Pillow (3)',
+        'color': colors[6],
+        'marker': 'X',
+        'size': 100
+    },
+    'sos_SWE_p4':{
+        'name': 'Snow Pillow (4)',
+        'color': colors[6],
+        'marker': 'X',
+        'size': 100
+    },
+    'sail_org':{
+        'name': 'Optical Rain Gauge',
+        'color': colors[6],
+        'marker': '^',
+        'size': 100
+    },
+    'sail_pwd':{
+        'name': 'Present Weather Detector',
+        'color': colors[7],
+        'marker': 'v',
+        'size': 100
+    },
+    'sail_squire_m2009_2':{
+        'name': 'Squire M2009-2',
+        'color': colors[8],
+        'marker': 'p',
+        'size': 120
+    },
+    'sail_squire_m2009_1':{
+        'name': 'Squire M2009-1',
+        'color': colors[9],
+        'marker': 'p',
+        'size': 120
+    },
+    'sail_squire_ws2012':{
+        'name': 'Squire WS2012',
+        'color': colors[10],
+        'marker': 'p',
+        'size': 120
+    },
+    'sail_squire_ws88diw':{
+        'name': 'Squire WS88DIW',
+        'color': colors[11],
+        'marker': 'p',
+        'size': 120
+    },
+    'sail_tbg':{
+        'name': 'Tipping Bucket Gauge',
+        'color': colors[12],
+        'marker': 'P',
+        'size': 100
+    },
+    'era5_land_tp':{
+        'name': 'ERA5-Land',
+        'color': colors[13],
+        'marker': '*',
+        'size': 120
+    },
+    'prism_ppt':{
+        'name': 'PRISM',
+        'color': colors[14],
+        'marker': '*',
+        'size': 120
+    }
+}
+
 # create a function to setup a dataframe for a windrose plot in plotly
 def create_windrose_df(df, wind_dir_var, wind_spd_var):
     """
