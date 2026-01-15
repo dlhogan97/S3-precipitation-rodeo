@@ -126,79 +126,103 @@ colors = [cmap(i) for i in range(cmap.N)]
 
 INSTRUMENT_PLOT_DICT = {
     'billy_barr_precip':{
-        'name': 'Billy Barr Rain Gauge',
-        'color': colors[0],
+        'name': 'billy barr (benchmark)',
+        'color': 'black',
         'marker': 'o',
         'size': 100
     },
     'sail_pluvio':{
-        'name': 'Pluviometer',
+        'name': 'WB',
         'color': colors[1],
         'marker': 's',
         'size': 100
     },
     'splash_pluvio':{
-        'name': 'Pluviometer',
+        'name': 'WB',
         'color': colors[1],
         'marker': 's',
         'size': 100
     },
-    'sail_ld_uncorrected':{
-        'name': 'Laser Disdrometer\n(Uncorrected)',
+    'sail_ld_unadjusted':{
+        'name': 'LD-unadjusted',
         'color': colors[2],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_brandes':{
-        'name': 'Laser Disdrometer\n(Brandes Correction)',
+        'name': 'LD-Brandes',
         'color': colors[3],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_holyroyd':{
-        'name': 'Laser Disdrometer\n(Holyroyd Correction)',
+        'name': 'LD-Holyroyd',
         'color': colors[4],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_heymsfield':{
-        'name': 'Laser Disdrometer\n(Heymsfield Correction)',
+        'name': 'LD-Heymsfield',
+        'color': colors[5],
+        'marker': 'D',
+        'size': 100
+    },
+    'splash_ld_unadjusted':{
+        'name': 'LD-unadjusted',
+        'color': colors[2],
+        'marker': 'D',
+        'size': 100
+    },
+    'splash_ld_brandes':{
+        'name': 'LD-Brandes',
+        'color': colors[3],
+        'marker': 'D',
+        'size': 100
+    },
+    'splash_ld_holyroyd':{
+        'name': 'LD-Holyroyd',
+        'color': colors[4],
+        'marker': 'D',
+        'size': 100
+    },
+    'splash_ld_heymsfield':{
+        'name': 'LD-Heymsfield',
         'color': colors[5],
         'marker': 'D',
         'size': 100
     },
     'sos_SWE_p1':{
-        'name': 'Snow Pillow (1)',
+        'name': 'SP 1',
         'color': colors[6],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p2':{
-        'name': 'Snow Pillow (2)',
+        'name': 'SP 2',
         'color': colors[6],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p3':{
-        'name': 'Snow Pillow (3)',
+        'name': 'SP 3',
         'color': colors[6],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p4':{
-        'name': 'Snow Pillow (4)',
+        'name': 'SP 4',
         'color': colors[6],
         'marker': 'X',
         'size': 100
     },
     'sail_org':{
-        'name': 'Optical Rain Gauge',
+        'name': 'ORG',
         'color': colors[6],
         'marker': '^',
         'size': 100
     },
     'sail_pwd':{
-        'name': 'Present Weather Detector',
+        'name': 'PWD',
         'color': colors[7],
         'marker': 'v',
         'size': 100
@@ -227,9 +251,33 @@ INSTRUMENT_PLOT_DICT = {
         'marker': 'p',
         'size': 120
     },
+    'splash_squire_m2009_2':{
+        'name': 'Squire M2009-2',
+        'color': colors[8],
+        'marker': 'p',
+        'size': 120
+    },
+    'splash_squire_m2009_1':{
+        'name': 'Squire M2009-1',
+        'color': colors[9],
+        'marker': 'p',
+        'size': 120
+    },
+    'splash_squire_ws2012':{
+        'name': 'Squire WS2012',
+        'color': colors[10],
+        'marker': 'p',
+        'size': 120
+    },
+    'splash_squire_ws88diw':{
+        'name': 'Squire WS88DIW',
+        'color': colors[11],
+        'marker': 'p',
+        'size': 120
+    },
     'sail_tbg':{
-        'name': 'Tipping Bucket Gauge',
-        'color': colors[12],
+        'name': 'TBG',
+        'color': colors[0],
         'marker': 'P',
         'size': 100
     },
@@ -240,6 +288,18 @@ INSTRUMENT_PLOT_DICT = {
         'size': 120
     },
     'prism_ppt':{
+        'name': 'PRISM',
+        'color': colors[14],
+        'marker': '*',
+        'size': 120
+    },
+    'ERA5-Land':{
+        'name': 'ERA5-Land',
+        'color': colors[13],
+        'marker': '*',
+        'size': 120
+    },
+    'PRISM':{
         'name': 'PRISM',
         'color': colors[14],
         'marker': '*',
@@ -635,7 +695,7 @@ class TaylorDiagram:
     Adapted from: https://pcmdi.llnl.gov/staff/taylor/CV/Taylor_diagram_primer.pdf
     """
 
-    def __init__(self, ref, fig=None, rect=111, label='Reference'):
+    def __init__(self, ref, fig=None, rect=111, label='Benchmark'):
         # Prepare reference
         self.ref = np.asarray(ref).ravel()
         self.ref_std = np.std(self.ref[~np.isnan(self.ref)], ddof=1)
