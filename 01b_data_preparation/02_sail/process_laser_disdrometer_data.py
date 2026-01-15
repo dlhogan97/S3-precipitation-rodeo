@@ -116,12 +116,12 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
         # update precip_flag accordingly
         ds_sub['precip_bad_flag'] = ds_sub['precip_bad_flag'].where(ds_sub['precip_rate'] <= reasonable_threshold, True)
     #  4. calculate correction for snow using all methods (save these as individual arrays)
-    precip_rate_uncorrected = ds_sub['precip_rate']
+    precip_rate_unadjusted = ds_sub['precip_rate']
     precip_rate_holroyd = correct_SAIL_parsivel_for_snow(ds_sub, 'holroyd1971')
     precip_rate_brandes = correct_SAIL_parsivel_for_snow(ds_sub, 'brandes2007')
     precip_rate_heymsfield = correct_SAIL_parsivel_for_snow(ds_sub, 'heymsfield2004')
 
-    precip_rate_uncorrected.name = 'precip_rate_uncorrected'
+    precip_rate_unadjusted.name = 'precip_rate_unadjusted'
     precip_rate_holroyd.name = 'precip_rate_holyroyd'
     precip_rate_brandes.name = 'precip_rate_brandes'
     precip_rate_heymsfield.name = 'precip_rate_heymsfield'
@@ -133,22 +133,22 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
         precip_rate.attrs['long_name'] = f'Precipitation rate corrected for snow using {method} method'
 
     # 5. create accumulated variable
-    precip_accum_uncorrected = precip_rate_uncorrected/60 # convert from mm/hr to mm/min
+    precip_accum_unadjusted = precip_rate_unadjusted/60 # convert from mm/hr to mm/min
     precip_accum_holroyd = precip_rate_holroyd/60
     precip_accum_brandes = precip_rate_brandes/60
     precip_accum_heymsfield = precip_rate_heymsfield/60
 
-    precip_accum_uncorrected.name = 'precip_accum_uncorrected'
+    precip_accum_unadjusted.name = 'precip_accum_unadjusted'
     precip_accum_holroyd.name = 'precip_accum_holyroyd'
     precip_accum_brandes.name = 'precip_accum_brandes'
     precip_accum_heymsfield.name = 'precip_accum_heymsfield'
 
-    precip_accum_uncorrected.attrs['units'] = 'mm'
+    precip_accum_unadjusted.attrs['units'] = 'mm'
     precip_accum_holroyd.attrs['units'] = 'mm'
     precip_accum_brandes.attrs['units'] = 'mm'
     precip_accum_heymsfield.attrs['units'] = 'mm'
 
-    precip_accum_uncorrected.attrs['long_name'] = 'Accumulated precipitation uncorrected'
+    precip_accum_unadjusted.attrs['long_name'] = 'Accumulated precipitation unadjusted'
     precip_accum_holroyd.attrs['long_name'] = 'Accumulated precipitation corrected using holroyd1971 method'
     precip_accum_brandes.attrs['long_name'] = 'Accumulated precipitation corrected using brandes2007 method'
     precip_accum_heymsfield.attrs['long_name'] = 'Accumulated precipitation corrected using heymsfield2004 method'
@@ -156,7 +156,7 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
     # 6. resample to desired length using appropriate function for each variable
     
     # accumulated variables: sum
-    precip_accum_uncorrected_da = precip_accum_uncorrected.resample(time=resample_interval).sum()
+    precip_accum_unadjusted_da = precip_accum_unadjusted.resample(time=resample_interval).sum()
     precip_accum_holroyd_da = precip_accum_holroyd.resample(time=resample_interval).sum()
     precip_accum_brandes_da = precip_accum_brandes.resample(time=resample_interval).sum()
     precip_accum_heymsfield_da = precip_accum_heymsfield.resample(time=resample_interval).sum()
@@ -197,7 +197,7 @@ def process_disdrometer_data(file, resample_interval='30min', local_tz='America/
 
     # 7. merge all variables back into a single dataset
     ds_resampled = xr.merge([
-        precip_accum_uncorrected_da,
+        precip_accum_unadjusted_da,
         precip_accum_holroyd_da,
         precip_accum_brandes_da,
         precip_accum_heymsfield_da,

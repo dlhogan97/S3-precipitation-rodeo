@@ -409,12 +409,12 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
     tmin = pd.Timestamp(raw_ds.time.min().item())
     tmax = pd.Timestamp(raw_ds.time.max().item())
     # calculate corrected snowfall rate
-    precip_rate_uncorrected = raw_ds['precip_intensity'].resample(time="2min").mean(skipna=True, keep_attrs=True) / 30  # convert from mm/hr to mm/min
+    precip_rate_unadjusted = raw_ds['precip_intensity'].resample(time="2min").mean(skipna=True, keep_attrs=True) / 30  # convert from mm/hr to mm/min
     precip_rate_holyroyd = correct_SPLASH_parsivel_for_snow(raw_ds, method='holroyd1971').resample(time="2min").mean(skipna=True, keep_attrs=True) / 30
     precip_rate_brandes = correct_SPLASH_parsivel_for_snow(raw_ds, method='brandes2007').resample(time="2min").mean(skipna=True, keep_attrs=True) / 30
     precip_rate_heymsfield = correct_SPLASH_parsivel_for_snow(raw_ds, method='heymsfield2004').resample(time="2min").mean(skipna=True, keep_attrs=True) / 30
 
-    precip_rate_uncorrected.name = 'precip_intensity'
+    precip_rate_unadjusted.name = 'precip_intensity'
     precip_rate_holyroyd.name = 'precip_intensity_holroyd1971'
     precip_rate_brandes.name = 'precip_intensity_brandes2007'
     precip_rate_heymsfield.name = 'precip_intensity_heymsfield2004'
@@ -425,7 +425,7 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
     error_code = raw_ds['error_code'].resample(time="2min").sum(skipna=True, keep_attrs=True)
 
     for da in [precip_accum, sensor_status, error_code, 
-               precip_rate_uncorrected, precip_rate_holyroyd, 
+               precip_rate_unadjusted, precip_rate_holyroyd, 
                precip_rate_brandes, precip_rate_heymsfield]:
         da.name = da.name
         da = da.reindex(time=pd.date_range(
@@ -437,7 +437,7 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
         precip_accum,
         sensor_status,
         error_code,
-        precip_rate_uncorrected,
+        precip_rate_unadjusted,
         precip_rate_holyroyd,
         precip_rate_brandes,
         precip_rate_heymsfield
@@ -462,12 +462,12 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
 
     # variables for resampling
     #  4. calculate correction for snow using all methods (save these as individual arrays)
-    precip_rate_uncorrected = ds['precip_intensity']
+    precip_rate_unadjusted = ds['precip_intensity']
     precip_rate_holroyd = ds['precip_intensity_holroyd1971']
     precip_rate_brandes = ds['precip_intensity_brandes2007']
     precip_rate_heymsfield = ds['precip_intensity_heymsfield2004']
 
-    precip_rate_uncorrected.name = 'precip_rate_uncorrected'
+    precip_rate_unadjusted.name = 'precip_rate_unadjusted'
     precip_rate_holroyd.name = 'precip_rate_holyroyd'
     precip_rate_brandes.name = 'precip_rate_brandes'
     precip_rate_heymsfield.name = 'precip_rate_heymsfield'
@@ -479,22 +479,22 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
         precip_rate.attrs['long_name'] = f'Precipitation rate corrected for snow using {method} method'
 
     # 5. create accumulated variable
-    precip_accum_uncorrected = precip_rate_uncorrected/30 # convert from mm/hr to mm/min
+    precip_accum_unadjusted = precip_rate_unadjusted/30 # convert from mm/hr to mm/min
     precip_accum_holroyd = precip_rate_holroyd/30
     precip_accum_brandes = precip_rate_brandes/30
     precip_accum_heymsfield = precip_rate_heymsfield/30
 
-    precip_accum_uncorrected.name = 'precip_accum_uncorrected'
+    precip_accum_unadjusted.name = 'precip_accum_unadjusted'
     precip_accum_holroyd.name = 'precip_accum_holyroyd'
     precip_accum_brandes.name = 'precip_accum_brandes'
     precip_accum_heymsfield.name = 'precip_accum_heymsfield'
 
-    precip_accum_uncorrected.attrs['units'] = 'mm'
+    precip_accum_unadjusted.attrs['units'] = 'mm'
     precip_accum_holroyd.attrs['units'] = 'mm'
     precip_accum_brandes.attrs['units'] = 'mm'
     precip_accum_heymsfield.attrs['units'] = 'mm'
 
-    precip_accum_uncorrected.attrs['long_name'] = 'Accumulated precipitation uncorrected'
+    precip_accum_unadjusted.attrs['long_name'] = 'Accumulated precipitation unadjusted'
     precip_accum_holroyd.attrs['long_name'] = 'Accumulated precipitation corrected using holroyd1971 method'
     precip_accum_brandes.attrs['long_name'] = 'Accumulated precipitation corrected using brandes2007 method'
     precip_accum_heymsfield.attrs['long_name'] = 'Accumulated precipitation corrected using heymsfield2004 method'
@@ -502,7 +502,7 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
     # 6. resample to desired length using appropriate function for each variable
     
     # accumulated variables: sum
-    precip_accum_uncorrected_da = precip_accum_uncorrected.resample(time=resample_interval).sum()
+    precip_accum_unadjusted_da = precip_accum_unadjusted.resample(time=resample_interval).sum()
     precip_accum_holroyd_da = precip_accum_holroyd.resample(time=resample_interval).sum()
     precip_accum_brandes_da = precip_accum_brandes.resample(time=resample_interval).sum()
     precip_accum_heymsfield_da = precip_accum_heymsfield.resample(time=resample_interval).sum()
@@ -510,7 +510,7 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
     precip_accum_stats_da = ds['Amount'].resample(time=resample_interval).sum()
    
     # mean variables: 
-    precip_rate_uncorrected_da = precip_rate_uncorrected.resample(time=resample_interval).mean()
+    precip_rate_unadjusted_da = precip_rate_unadjusted.resample(time=resample_interval).mean()
     precip_rate_holroyd_da = precip_rate_holroyd.resample(time=resample_interval).mean()
     precip_rate_brandes_da = precip_rate_brandes.resample(time=resample_interval).mean()
     precip_rate_heymsfield_da = precip_rate_heymsfield.resample(time=resample_interval).mean()
@@ -528,13 +528,13 @@ def correct_SPLASH_parsivel_for_snow(ds, method='holroyd1971'):
     precip_bad_flag_da.attrs['description'] = 'Quality flag for precipitation data: True = bad data, False = good data'
 
     ds_resampled = xr.merge([
-        precip_accum_uncorrected_da,
+        precip_accum_unadjusted_da,
         precip_accum_holroyd_da,
         precip_accum_brandes_da,
         precip_accum_heymsfield_da,
         precip_accum_raw_da,
         precip_accum_stats_da,
-        precip_rate_uncorrected_da,
+        precip_rate_unadjusted_da,
         precip_rate_holroyd_da,
         precip_rate_brandes_da,
         precip_rate_heymsfield_da,
@@ -554,13 +554,13 @@ def resample_raw_laser_disdrometer_data(file, resample_interval='30min', local_t
     raw_ds = process_raw_laser_disdrometer_file(file,)
 
     # Resample everything using the controlled method:
-    precip_rate_uncorrected = raw_ds['precip_intensity']
+    precip_rate_unadjusted = raw_ds['precip_intensity']
     precip_rate_holyroyd    = correct_SPLASH_parsivel_for_snow(raw_ds, method='holroyd1971')
     precip_rate_brandes     = correct_SPLASH_parsivel_for_snow(raw_ds, method='brandes2007')
     precip_rate_heymsfield  = correct_SPLASH_parsivel_for_snow(raw_ds, method='heymsfield2004')
     
     # name variables
-    precip_rate_uncorrected.name = 'precip_rate_uncorrected'
+    precip_rate_unadjusted.name = 'precip_rate_unadjusted'
     precip_rate_holyroyd.name = 'precip_rate_holyroyd'
     precip_rate_brandes.name = 'precip_rate_brandes'
     precip_rate_heymsfield.name = 'precip_rate_heymsfield'
@@ -572,52 +572,52 @@ def resample_raw_laser_disdrometer_data(file, resample_interval='30min', local_t
         precip_rate.attrs['long_name'] = f'Precipitation rate corrected for snow using {method} method'
 
     # 5. create accumulated variable
-    precip_accum_uncorrected = precip_rate_uncorrected/30 # convert from mm/hr to mm/min
+    precip_accum_unadjusted = precip_rate_unadjusted/30 # convert from mm/hr to mm/min
     precip_accum_holyroyd = precip_rate_holyroyd/30
     precip_accum_brandes = precip_rate_brandes/30
     precip_accum_heymsfield = precip_rate_heymsfield/30
 
     # toss values less than 0.01
-    precip_accum_uncorrected = precip_accum_uncorrected.where(precip_accum_uncorrected >= 0.001, 0)
+    precip_accum_unadjusted = precip_accum_unadjusted.where(precip_accum_unadjusted >= 0.001, 0)
     precip_accum_holyroyd = precip_accum_holyroyd.where(precip_accum_holyroyd >= 0.001, 0)
     precip_accum_brandes = precip_accum_brandes.where(precip_accum_brandes >= 0.001, 0)
     precip_accum_heymsfield = precip_accum_heymsfield.where(precip_accum_heymsfield >= 0.001, 0)
 
-    precip_accum_uncorrected.name = 'precip_accum_uncorrected'
+    precip_accum_unadjusted.name = 'precip_accum_unadjusted'
     precip_accum_holyroyd.name = 'precip_accum_holyroyd'
     precip_accum_brandes.name = 'precip_accum_brandes'
     precip_accum_heymsfield.name = 'precip_accum_heymsfield'
 
-    precip_accum_uncorrected.attrs['units'] = 'mm'
+    precip_accum_unadjusted.attrs['units'] = 'mm'
     precip_accum_holyroyd.attrs['units'] = 'mm'
 
     precip_accum_brandes.attrs['units'] = 'mm'
     precip_accum_heymsfield.attrs['units'] = 'mm'
 
-    precip_accum_uncorrected.attrs['long_name'] = 'Accumulated precipitation uncorrected'
+    precip_accum_unadjusted.attrs['long_name'] = 'Accumulated precipitation unadjusted'
     precip_accum_holyroyd.attrs['long_name'] = 'Accumulated precipitation corrected using holroyd1971 method'
     precip_accum_brandes.attrs['long_name'] = 'Accumulated precipitation corrected using brandes2007 method'
     precip_accum_heymsfield.attrs['long_name'] = 'Accumulated precipitation corrected using heymsfield2004 method'
 
     # accumulated variables: sum
-    precip_accum_uncorrected_da = precip_accum_uncorrected.resample(time=resample_interval).sum()
+    precip_accum_unadjusted_da = precip_accum_unadjusted.resample(time=resample_interval).sum()
     precip_accum_holyroyd_da = precip_accum_holyroyd.resample(time=resample_interval).sum()
     precip_accum_brandes_da = precip_accum_brandes.resample(time=resample_interval).sum()
     precip_accum_heymsfield_da = precip_accum_heymsfield.resample(time=resample_interval).sum()
    
     # mean variables: 
-    precip_rate_uncorrected_da = precip_rate_uncorrected.resample(time=resample_interval).mean()
+    precip_rate_unadjusted_da = precip_rate_unadjusted.resample(time=resample_interval).mean()
     precip_rate_holyroyd_da = precip_rate_holyroyd.resample(time=resample_interval).mean()
     precip_rate_brandes_da = precip_rate_brandes.resample(time=resample_interval).mean()
     precip_rate_heymsfield_da = precip_rate_heymsfield.resample(time=resample_interval).mean()
 
     raw_ds_resampled = xr.merge([
-        precip_accum_uncorrected_da,
+        precip_accum_unadjusted_da,
         precip_accum_brandes_da,
         precip_accum_heymsfield_da,
         precip_accum_holyroyd_da,
         precip_rate_holyroyd_da,
-        precip_rate_uncorrected_da,
+        precip_rate_unadjusted_da,
         precip_rate_brandes_da,
         precip_rate_heymsfield_da,
     ])

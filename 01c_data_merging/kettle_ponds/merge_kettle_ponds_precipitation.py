@@ -29,8 +29,8 @@ if __name__ == "__main__":
                                                                                                'precip_accum_heymsfield',
                                                                                                'precip_type']]
     # rename qc variables
-    splash_ld_ds = splash_ld_ds.rename({'qc_missing_precip':'qc_missing_splash_ld_uncorrected',
-                                        'qc_bad_precip':'qc_bad_splash_ld_uncorrected'})
+    splash_ld_ds = splash_ld_ds.rename({'qc_missing_precip':'qc_missing_splash_ld_unadjusted',
+                                        'qc_bad_precip':'qc_bad_splash_ld_unadjusted'})
     # sos data
     sos_ds = xr.open_dataset(f'{DATA_PATH}SOS/sos_ds_30min.nc')[['SWE_p1_c_max_accum', 'qc_SWE_p1_c_missing', 'qc_SWE_p1_c_bad',
                                                                 'SWE_p2_c_max_accum', 'qc_SWE_p2_c_missing', 'qc_SWE_p2_c_bad',
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     variable_renames_kp = {
                             'precip': 'billy_barr_precip',
                             'prcp':'splash_pluvio',
-                            'Amount': 'splash_ld_uncorrected',
+                            'Amount': 'splash_ld_unadjusted',
                             'precip_accum_holyroyd' : 'splash_ld_holyroyd',
                             'precip_accum_brandes':'splash_ld_brandes',
                             'precip_accum_heymsfield':'splash_ld_heymsfield',

@@ -17,12 +17,12 @@ if __name__ == "__main__":
     # rename flags to qc_missing_billy_barr_precip and qc_bad_billy_barr_precip
     billy_barr_ds = billy_barr_ds.rename({'precip_missing_flag':'qc_missing_billy_barr_precip',
                                         'precip_bad_flag':'qc_bad_billy_barr_precip'})
-    sail_ld_ds = xr.open_dataset(f'{DATA_PATH}SAIL/laser_disdrometer_gothic_processed_30min.nc')[['precip_accum_uncorrected','precip_accum_holyroyd',
+    sail_ld_ds = xr.open_dataset(f'{DATA_PATH}SAIL/laser_disdrometer_gothic_processed_30min.nc')[['precip_accum_unadjusted','precip_accum_holyroyd',
                                                                                                 'precip_accum_brandes','precip_accum_heymsfield',
                                                                                                 'precip_missing_flag','precip_bad_flag',]].sortby('time')
     # rename variables to qc_missing_sail_ld and qc_bad_sail_ld
-    sail_ld_ds = sail_ld_ds.rename({'precip_missing_flag':'qc_missing_sail_ld_uncorrected',
-                                    'precip_bad_flag':'qc_bad_sail_ld_uncorrected'})
+    sail_ld_ds = sail_ld_ds.rename({'precip_missing_flag':'qc_missing_sail_ld_unadjusted',
+                                    'precip_bad_flag':'qc_bad_sail_ld_unadjusted'})
     sail_pluvio_ds = xr.open_dataset(f'{DATA_PATH}SAIL/pluvio_30min.nc')[['accum_nrt','pluvio_missing_flag','pluvio_bad_flag',]].sortby('time')
     # rename variables to qc_missing_sail_pluvio and qc_bad_sail_pluvio
     sail_pluvio_ds = sail_pluvio_ds.rename({'pluvio_missing_flag':'qc_missing_sail_pluvio',
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     # rename the variables
     variable_renames = {
         'precip': 'billy_barr_precip',
-        'precip_accum_uncorrected': 'sail_ld_uncorrected',
+        'precip_accum_unadjusted': 'sail_ld_unadjusted',
         'precip_accum_holyroyd':'sail_ld_holyroyd',
         'precip_accum_brandes':'sail_ld_brandes',
         'precip_accum_heymsfield':'sail_ld_heymsfield',
