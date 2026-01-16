@@ -1,11 +1,12 @@
-import os
-# set working directory
-os.chdir('/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo/')
-
+import sys, os
+project_root = "/home/dlhogan/projects/phd-repos/S3-precipitation-rodeo"
+if project_root not in sys.path:
+    sys.path.append(project_root)
 import xarray as xr
 import pandas as pd
-from utils.get_sail_data import get_sail_data
+# from utils.get_sail_data import get_sail_data
 import json
+import act
 
 # Function to load ARM credentials
 def load_arm_credentials(credential_path):
@@ -22,14 +23,14 @@ print("Loaded ARM credentials")
 
 # Datastream to download
 sail_datastream_dict = {
-    "squire_radar": "gucxprecipradarsquireS2.c1",
+    "updated_squire": "gucxprecipradarsquireS2.c1",
 }
 
 # data time series
 date_range = pd.date_range(start='2021-09-01', 
                            end='2023-06-16', 
-                           freq='5D') # CHANGE THIS IF DESIRED
-print(f"Set date range to {date_range[0]} to {date_range[-1]} with frequency of 5 days")
+                           freq='1D') # CHANGE THIS IF DESIRED
+print(f"Set date range to {date_range[0]} to {date_range[-1]} with frequency of 1 day")
 
 # change to location of data folder on your machine
 storage_directory = f'/storage/dlhogan/precipitation-rodeo/data/raw/SAIL/' # CHANGE THIS TO YOUR DIRECTORY
@@ -52,30 +53,17 @@ for i, date in enumerate(date_range):
         break
     for key in sail_datastream_dict.keys():
         # Check if the file already exists
-        if (os.path.exists(f"{storage_directory}/{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}.nc")):
-            print(f"{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}.nc already exists")
+        if (os.path.exists(f"{storage_directory}/{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}.000000.nc")):
+            print(f"{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}.000000.nc already exists")
             print('-------------------')
             # add the filename to the dictionary which can be used if we want to load the data
             data_loc_dict[sail_datastream_dict[key]] = os.path.join(storage_directory,
-                                                                    f"{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}.nc")
+                                                                    f"{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}.000000.nc")
             continue
         else:
-            ds = get_sail_data(api_username,
-                        api_token,
-                        sail_datastream_dict[key],
-                        startdate=date.strftime('%Y%m%d'),
-                        enddate=(date + pd.Timedelta('4D')).strftime('%Y%m%d'))
-            if ds is None:
-                print(f"No data for {sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}")
-                print('-------------------')
-                continue
-            else:
-                # resample to 30 min using mean
-                ds = ds.resample(time='30min').mean() 
-                print("Resampling data...")
-                # drop lowest_height variable if it exists
-                ds = ds.drop_vars("lowest_height")
-                # save the dataset
-                ds.to_netcdf(f"{storage_directory}/{key}/{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}_{(date + pd.Timedelta('4D')).strftime('%Y%m%d')}.nc")
-            # print that this file is completed
+            act.discovery.download_arm_data(
+                                            api_username, 
+                                            api_token, 
+                                            sail_datastream_dict[key],
+                                            date.strftime('%Y%m%d'), (date + pd.Timedelta('4D')).strftime('%Y%m%d'))
     print(f"File {i+1} of {len(date_range)} completed")
