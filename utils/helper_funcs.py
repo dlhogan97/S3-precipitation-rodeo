@@ -151,7 +151,7 @@ INSTRUMENT_PLOT_DICT = {
     },
     'sail_ld_brandes':{
         'name': 'LD-Brandes',
-        'color': colors[3],
+        'color': colors[0],
         'marker': 'D',
         'size': 100
     },
@@ -175,7 +175,7 @@ INSTRUMENT_PLOT_DICT = {
     },
     'splash_ld_brandes':{
         'name': 'LD-Brandes',
-        'color': colors[3],
+        'color': colors[0],
         'marker': 'D',
         'size': 100
     },
@@ -228,82 +228,82 @@ INSTRUMENT_PLOT_DICT = {
         'size': 100
     },
     'sail_squire_m2009_2':{
-        'name': 'Squire M2009-2',
+        'name': 'SQUIRE M2009-2',
         'color': colors[8],
         'marker': 'p',
         'size': 120
     },
     'sail_squire_m2009_1':{
-        'name': 'Squire M2009-1',
+        'name': 'SQUIRE M2009-1',
         'color': colors[9],
         'marker': 'p',
         'size': 120
     },
     'sail_squire_ws2012':{
-        'name': 'Squire WS2012',
+        'name': 'SQUIRE WS2012',
         'color': colors[10],
         'marker': 'p',
         'size': 120
     },
     'sail_squire_ws88diw':{
-        'name': 'Squire WS88DIW',
+        'name': 'SQUIRE WS88DIW',
         'color': colors[11],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_m2009_2':{
-        'name': 'Squire M2009-2',
+        'name': 'SQUIRE M2009-2',
         'color': colors[8],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_m2009_1':{
-        'name': 'Squire M2009-1',
+        'name': 'SQUIRE M2009-1',
         'color': colors[9],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_ws2012':{
-        'name': 'Squire WS2012',
+        'name': 'SQUIRE WS2012',
         'color': colors[10],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_ws88diw':{
-        'name': 'Squire WS88DIW',
+        'name': 'SQUIRE WS88DIW',
         'color': colors[11],
         'marker': 'p',
         'size': 120
     },
     'sail_tbg':{
         'name': 'TBG',
-        'color': colors[0],
+        'color': colors[13],
         'marker': 'P',
         'size': 100
     },
     'era5_land_tp':{
         'name': 'ERA5-Land',
-        'color': colors[13],
+        'color': colors[3],
         'marker': '*',
-        'size': 120
+        'size': 140
     },
     'prism_ppt':{
         'name': 'PRISM',
         'color': colors[14],
         'marker': '*',
-        'size': 120
+        'size': 140
     },
     'ERA5-Land':{
         'name': 'ERA5-Land',
-        'color': colors[13],
+        'color': colors[3],
         'marker': '*',
-        'size': 120
+        'size': 140
     },
     'PRISM':{
         'name': 'PRISM',
         'color': colors[14],
         'marker': '*',
-        'size': 120
+        'size': 140
     }
 }
 
