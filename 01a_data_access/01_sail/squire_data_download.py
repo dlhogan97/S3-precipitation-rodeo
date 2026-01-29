@@ -47,7 +47,8 @@ for key in sail_datastream_dict.keys():
 # download the data 
 # create empty data dictionary
 data_loc_dict = {}
-# Iterate through the dictionary and pull the data for each datastream
+dates_to_download = []
+# Check if the data already exists before downloading
 for i, date in enumerate(date_range):
     if i == len(date_range) - 1:
         break
@@ -59,11 +60,22 @@ for i, date in enumerate(date_range):
             # add the filename to the dictionary which can be used if we want to load the data
             data_loc_dict[sail_datastream_dict[key]] = os.path.join(storage_directory,
                                                                     f"{sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}.000000.nc")
-            continue
+            break
         else:
+            if date.month in [1,2,3,12]:
+                print(f"File {sail_datastream_dict[key]}_{date.strftime('%Y%m%d')}.000000.nc not found. Downloading data...")
+                dates_to_download.append(date)
+# prompt user before downloading large amounts of data
+if len(dates_to_download) > 0:
+    print(f"About to download {len(dates_to_download)} days of data. This may take a while.")
+    user_input = input("Do you want to proceed? (y/n): ")
+    if user_input.lower() != 'y':
+        print("Download cancelled by user.")
+    else:
+        for key in sail_datastream_dict.keys():
             act.discovery.download_arm_data(
                                             api_username, 
                                             api_token, 
                                             sail_datastream_dict[key],
-                                            date.strftime('%Y%m%d'), (date + pd.Timedelta('4D')).strftime('%Y%m%d'))
-    print(f"File {i+1} of {len(date_range)} completed")
+                                            date_range[0].strftime('%Y%m%d'), date_range[-1].strftime('%Y%m%d'),
+                                            output=os.path.join(storage_directory, key))

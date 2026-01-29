@@ -100,7 +100,7 @@ if __name__ == "__main__":
             kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].astype(int)
 
     # Save the merged dataset
-    output_filepath = f'{DATA_PATH}final/kettle_ponds_precipitation_30min.nc'
+    output_filepath = f'{DATA_PATH}final/kettle_ponds_precipitation_30min_with_flags.nc'
     try:
         kettle_ponds_combined_ds.to_netcdf(output_filepath)
         print(f'Merged dataset saved to {output_filepath}')

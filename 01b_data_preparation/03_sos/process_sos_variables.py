@@ -69,6 +69,7 @@ def process_sos_variables(ds, vars_to_keep, swe_vars, resample_interval='30min',
             'RH_2m_c': 'mean', 'RH_3m_c': 'mean', 'RH_10m_c': 'mean',
             'P_10m_c': 'mean',
             'Rpile_out_9m_d': 'mean', 'Rpile_in_9m_d': 'mean', 'Rsw_in_9m_d': 'mean', 'Rsw_out_9m_d': 'mean',
+            'SF_avg_1m_ue': 'mean', 'SF_avg_2m_ue': 'mean',
         }
     )
     # update the qc values to be True if more than 25% of values in the interval were bad/missing
@@ -103,16 +104,19 @@ if __name__ == "__main__":
     press_vars = hf.PRESSURE_VARIABLES
     swe_vars = hf.SWE_VARIABLES
     rad_vars = hf.RADIATION_VARIABLES
+    bs_vars = hf.SNOW_FLUX
     RESAMPLE_INTERVAL = '30min'
     REASONABLE_THRESHOLD = 0.522 * 25.4  # reasonable threshold for precipitation
 
-    vars_to_keep = wind_vars + wv_vars + temp_vars + press_vars + swe_vars
+    vars_to_keep = wind_vars + wv_vars + temp_vars + press_vars + swe_vars + bs_vars
 
     # only variables at site _c
     vars_to_keep = [var for var in vars_to_keep if var.endswith('_c')]
 
     # only keep 2m, 3m, and 10m variables
     vars_to_keep = [var for var in vars_to_keep if any(f"_{h}" in var for h in ['2m', '3m', '10m', 'p1', 'p2', 'p3', 'p4'])]
+    # but add in 1m blowing snow flux
+    vars_to_keep += ['SF_avg_1m_ue', 'SF_avg_2m_ue']
 
     # remove vertical wind speed w_
     vars_to_keep = [var for var in vars_to_keep if not var.startswith('w_')] + rad_vars

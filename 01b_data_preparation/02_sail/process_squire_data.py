@@ -120,10 +120,10 @@ def process_squire_data(files, resample_interval='30min', gothic_point_info=None
 if __name__ == "__main__":
     data_dir = "/storage/dlhogan/precipitation-rodeo/data/"
     # check if SQUIRE files are present
-    if not os.path.exists(f"{data_dir}raw/SAIL/squire_radar/"):
+    if not os.path.exists(f"{data_dir}raw/SAIL/updated_squire/"):
         print("SQUIRE data directory not found. Download the data before proceeding.")
     try:
-        files = glob.glob(f"{data_dir}raw/SAIL/squire_radar/gucxprecipradarsquireS2.c1*.nc")
+        files = glob.glob(f"{data_dir}raw/SAIL/updated_squire/gucxprecipradarsquireS2.c1*.nc")
     except Exception as e:
         print(f"Error finding SQUIRE files: {e}")
 
