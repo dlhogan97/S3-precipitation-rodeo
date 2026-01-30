@@ -121,7 +121,7 @@ RADIATION_VARIABLES = [
 ]
 
 # color map
-cmap = plt.get_cmap('tab20', 15)  # 'tab20
+cmap = plt.get_cmap('tab20', 16)  # 'tab20
 colors = [cmap(i) for i in range(cmap.N)]
 
 INSTRUMENT_PLOT_DICT = {
@@ -199,19 +199,19 @@ INSTRUMENT_PLOT_DICT = {
     },
     'sos_SWE_p2':{
         'name': 'SP 2',
-        'color': colors[6],
+        'color': colors[7],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p3':{
         'name': 'SP 3',
-        'color': colors[6],
+        'color': colors[13],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p4':{
         'name': 'SP 4',
-        'color': colors[6],
+        'color': colors[15],
         'marker': 'X',
         'size': 100
     },
@@ -285,25 +285,25 @@ INSTRUMENT_PLOT_DICT = {
         'name': 'ERA5-Land',
         'color': colors[3],
         'marker': '*',
-        'size': 140
+        'size': 180
     },
     'prism_ppt':{
         'name': 'PRISM',
         'color': colors[14],
         'marker': '*',
-        'size': 140
+        'size': 180
     },
     'ERA5-Land':{
         'name': 'ERA5-Land',
         'color': colors[3],
         'marker': '*',
-        'size': 140
+        'size': 180
     },
     'PRISM':{
         'name': 'PRISM',
         'color': colors[14],
         'marker': '*',
-        'size': 140
+        'size': 180
     }
 }
 
@@ -772,11 +772,14 @@ class TaylorDiagram:
         theta = np.arccos(corr)    # angle = arccos(corr)
 
         # ALWAYS (theta, r) in polar coordinates
+        ms = 12
+        if marker == '*':
+            ms =16
         self.ax.plot(
             theta, std,
             linestyle='None',
             marker=marker,
-            markersize=12,
+            markersize=ms,
             markerfacecolor=color,
             markeredgecolor='k',
             markeredgewidth=1.5,
