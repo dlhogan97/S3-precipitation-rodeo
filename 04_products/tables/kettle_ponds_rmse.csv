@@ -1,16 +1,16 @@
-,Full Period,Water Year 2022,Water Year 2023,Rain Season 2022,Snow Season 2022,Snow Season 2023,Dec - Mar 2022,Dec - Mar 2023
-splash_pluvio,1.45,1.03,2.09,1.22,0.63,2.25,0.57,1.37
-splash_ld_unadjusted,3.01,2.28,4.18,1.37,1.79,4.55,2.01,3.11
-splash_ld_holyroyd,1.52,1.11,2.16,1.37,0.78,2.34,0.78,1.64
-splash_ld_brandes,1.52,1.1,2.18,1.37,0.77,2.35,0.77,1.67
-splash_ld_heymsfield,1.95,1.37,2.85,1.37,1.01,3.08,1.12,2.34
-sos_SWE_p1,,,,,,,,3.07
-sos_SWE_p2,,,,,,,,2.53
-sos_SWE_p3,,,,,,,,2.41
-sos_SWE_p4,,,,,,,,2.76
-sail_squire_m2009_1,,,,,,,1.35,3.28
-sail_squire_m2009_2,,,,,,,1.54,3.38
-sail_squire_ws88diw,,,,,,,1.15,2.78
-sail_squire_ws2012,,,,,,,1.42,3.13
-ERA5-Land,3.16,3.16,3.16,3.22,1.82,4.73,1.93,3.39
-PRISM,2.74,2.74,2.74,3.06,1.49,4.21,1.63,3.04
+,Full Period,Water Year 2022,Water Year 2023,Jun - Sep 2022,Snow Season 2022,Snow Season 2023,Dec - Mar 2022,Dec - Mar 2023
+splash_pluvio,1.417,1.029,1.985,1.217,0.634,2.125,0.573,1.378
+splash_ld_unadjusted,3.028,2.28,4.132,1.366,1.788,4.491,2.014,3.402
+splash_ld_holyroyd,1.498,1.11,2.065,1.368,0.78,2.231,0.778,1.721
+splash_ld_brandes,1.498,1.097,2.082,1.368,0.768,2.25,0.766,1.756
+splash_ld_heymsfield,1.942,1.369,2.772,1.368,1.008,2.991,1.12,2.525
+sos_SWE_p1,,,,,,,,3.345
+sos_SWE_p2,,,,,,,,2.731
+sos_SWE_p3,,,,,,,,2.599
+sos_SWE_p4,,,,,,,,3.003
+sail_squire_m2009_1,,,,,,,1.35,3.578
+sail_squire_m2009_2,,,,,,,1.544,3.699
+sail_squire_ws88diw,,,,,,,1.154,3.012
+sail_squire_ws2012,,,,,,,1.424,3.41
+ERA5-Land,3.377,3.377,3.377,3.219,1.818,4.667,1.925,3.705
+PRISM,2.924,2.924,2.924,3.059,1.492,4.14,1.628,3.311

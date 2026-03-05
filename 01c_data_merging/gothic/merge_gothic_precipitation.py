@@ -81,14 +81,12 @@ if __name__ == "__main__":
 
     # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 50 mm
     MIN = 0.05  # minimum measurable precipitation
-    MAX = 28.44  # 100-year event over 30 minutes
+    MAX = 28.44 # 100-year event over 30 minutes
     for var in gothic_combined_ds.data_vars:
+        gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] <= MAX), np.nan)
         if var == 'billy_barr_precip':
-            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] <= 15), np.nan)
-            gothic_combined_ds[var] = gothic_combined_ds[var].where(gothic_combined_ds[var] >= MIN, 0)
-        else:
-            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] <= MAX), np.nan)
-            gothic_combined_ds[var] = gothic_combined_ds[var].where(gothic_combined_ds[var] >= MIN, 0)
+            gothic_combined_ds[var] = gothic_combined_ds[var].where((gothic_combined_ds[var] <= MAX-15), np.nan)
+        gothic_combined_ds[var] = gothic_combined_ds[var].where(gothic_combined_ds[var] >= MIN, 0)
     print('Bad data removed.')
     # update all bad flags to 1 where data is nan
     for var in gothic_combined_ds.data_vars:

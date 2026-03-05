@@ -32,7 +32,6 @@ if not os.path.exists(result_file):
         'date': f"{DATES[0]}/{DATES[1]}",
         'time': TIME_STEPS,
         'area': [39, -108, 38, -106],  # North, West, South, East
-        'grid': [1, 1],
         'data_format': 'netcdf',
     }
     result_file = client.retrieve(dataset, request).download(f"/storage/dlhogan/precipitation-rodeo/data/external/ERA5-Land/era5_land_{DATES[0]}_{DATES[1]}.zip")

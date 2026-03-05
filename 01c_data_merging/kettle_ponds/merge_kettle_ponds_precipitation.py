@@ -40,8 +40,7 @@ if __name__ == "__main__":
     sos_ds = sos_ds.rename({var: var.replace('_c_', '_') for var in sos_ds.data_vars if 'qc_' in var})
     # for non-qc variables, take the difference between time steps to get precipitation
     for var in ['SWE_p1_c_max_accum', 'SWE_p2_c_max_accum', 'SWE_p3_c_max_accum', 'SWE_p4_c_max_accum']:
-        sos_ds[var] = sos_ds[var].diff(dim='time').fillna(0)
-
+        sos_ds[var] = sos_ds[var].diff(dim='time').fillna(0) 
     # sail squire data
     sail_squire_ds = xr.open_dataset(f'{DATA_PATH}SAIL/squire_30min.nc').sel(site='kettle_ponds').sortby('time').squeeze()
     squire_prcp_vars = [var for var in process_sail_data.SAIL_PRECIPITATION_VARS['cumulative'] if var in sail_squire_ds.data_vars]
@@ -86,6 +85,10 @@ if __name__ == "__main__":
     # remove any obvious bad data: negative precipitation values or 30 minute precipitation > 28.44 mm (100-year event over 30 minutes)
     for var in kettle_ponds_combined_ds.data_vars:
         kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] <= MAX), np.nan)
+        if var == 'billy_barr_precip':
+            kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] <= MAX-15), np.nan)
+        if 'sos' in var:
+            kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where((kettle_ponds_combined_ds[var] <= 100), np.nan)
         kettle_ponds_combined_ds[var] = kettle_ponds_combined_ds[var].where(kettle_ponds_combined_ds[var] >= MIN, 0)
     print('Maximum and minimum thresholds applied to Kettle Ponds data.')
 

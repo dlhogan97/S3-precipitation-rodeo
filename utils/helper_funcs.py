@@ -126,181 +126,211 @@ colors = [cmap(i) for i in range(cmap.N)]
 
 INSTRUMENT_PLOT_DICT = {
     'billy_barr_precip':{
-        'name': 'billy barr (benchmark)',
+        'name': 'Reference',
+        'full_name': 'Reference',
         'color': 'black',
         'marker': 'o',
         'size': 100
     },
     'sail_pluvio':{
         'name': 'WB',
+        'full_name': 'Weighing Bucket',
         'color': colors[1],
         'marker': 's',
         'size': 100
     },
     'splash_pluvio':{
         'name': 'WB',
+        'full_name': 'Weighing Bucket',
         'color': colors[1],
         'marker': 's',
         'size': 100
     },
     'sail_ld_unadjusted':{
         'name': 'LD-unadjusted',
+        'full_name': 'LD-unadjusted',
         'color': colors[2],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_brandes':{
         'name': 'LD-Brandes',
+        'full_name': 'LD-Brandes',   
         'color': colors[0],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_holyroyd':{
         'name': 'LD-Holyroyd',
+        'full_name': 'LD-Holyroyd',
         'color': colors[4],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_heymsfield':{
         'name': 'LD-Heymsfield',
+        'full_name': 'LD-Heymsfield',
         'color': colors[5],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_unadjusted':{
         'name': 'LD-unadjusted',
+        'full_name': 'LD-unadjusted',
         'color': colors[2],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_brandes':{
         'name': 'LD-Brandes',
+        'full_name': 'LD-Brandes',
         'color': colors[0],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_holyroyd':{
         'name': 'LD-Holyroyd',
+        'full_name': 'LD-Holyroyd',
         'color': colors[4],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_heymsfield':{
         'name': 'LD-Heymsfield',
+        'full_name': 'LD-Heymsfield',
         'color': colors[5],
         'marker': 'D',
         'size': 100
     },
     'sos_SWE_p1':{
         'name': 'SP 1',
+        'full_name': 'Snow Pillow 1',
         'color': colors[6],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p2':{
         'name': 'SP 2',
+        'full_name': 'Snow Pillow 2',
         'color': colors[7],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p3':{
         'name': 'SP 3',
+        'full_name': 'Snow Pillow 3',
         'color': colors[13],
         'marker': 'X',
         'size': 100
     },
     'sos_SWE_p4':{
         'name': 'SP 4',
+        'full_name': 'Snow Pillow 4',
         'color': colors[15],
         'marker': 'X',
         'size': 100
     },
     'sail_org':{
         'name': 'ORG',
+        'full_name': 'Optical Rain Gauge',
         'color': colors[6],
         'marker': '^',
         'size': 100
     },
     'sail_pwd':{
         'name': 'PWD',
+        'full_name': 'Present Weather Detector',
         'color': colors[7],
         'marker': 'v',
         'size': 100
     },
     'sail_squire_m2009_2':{
         'name': 'SQUIRE M2009-2',
+        'full_name': 'SQUIRE M2009-2',
         'color': colors[8],
         'marker': 'p',
         'size': 120
     },
     'sail_squire_m2009_1':{
         'name': 'SQUIRE M2009-1',
+        'full_name': 'SQUIRE M2009-1',
         'color': colors[9],
         'marker': 'p',
         'size': 120
     },
     'sail_squire_ws2012':{
         'name': 'SQUIRE WS2012',
+        'full_name': 'SQUIRE WS2012',
         'color': colors[10],
         'marker': 'p',
         'size': 120
     },
     'sail_squire_ws88diw':{
         'name': 'SQUIRE WS88DIW',
+        'full_name': 'SQUIRE WS88DIW',
         'color': colors[11],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_m2009_2':{
         'name': 'SQUIRE M2009-2',
+        'full_name': 'SQUIRE M2009-2',
         'color': colors[8],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_m2009_1':{
         'name': 'SQUIRE M2009-1',
+        'full_name': 'SQUIRE M2009-1',
         'color': colors[9],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_ws2012':{
         'name': 'SQUIRE WS2012',
+        'full_name': 'SQUIRE WS2012',
         'color': colors[10],
         'marker': 'p',
         'size': 120
     },
     'splash_squire_ws88diw':{
         'name': 'SQUIRE WS88DIW',
+        'full_name': 'SQUIRE WS88DIW',
         'color': colors[11],
         'marker': 'p',
         'size': 120
     },
     'sail_tbg':{
         'name': 'TBG',
+        'full_name': 'Tipping Bucket',
         'color': colors[13],
         'marker': 'P',
         'size': 100
     },
     'era5_land_tp':{
         'name': 'ERA5-Land',
+        'full_name': 'ERA5-Land',
         'color': colors[3],
         'marker': '*',
         'size': 180
     },
     'prism_ppt':{
         'name': 'PRISM',
+        'full_name': 'PRISM',
         'color': colors[14],
         'marker': '*',
         'size': 180
     },
     'ERA5-Land':{
         'name': 'ERA5-Land',
+        'full_name': 'ERA5-Land',
         'color': colors[3],
         'marker': '*',
         'size': 180
     },
     'PRISM':{
         'name': 'PRISM',
+        'full_name': 'PRISM',
         'color': colors[14],
         'marker': '*',
         'size': 180
@@ -695,7 +725,7 @@ class TaylorDiagram:
     Adapted from: https://pcmdi.llnl.gov/staff/taylor/CV/Taylor_diagram_primer.pdf
     """
 
-    def __init__(self, ref, fig=None, rect=111, label='Benchmark'):
+    def __init__(self, ref, fig=None, rect=111, label='Reference'):
         # Prepare reference
         self.ref = np.asarray(ref).ravel()
         self.ref_std = np.std(self.ref[~np.isnan(self.ref)], ddof=1)
@@ -732,7 +762,7 @@ class TaylorDiagram:
 
         # Axis labels
         self.ax.set_ylabel("Standard Deviation (Instrument)\n(mm/day)", labelpad=20)
-        self.ax.set_xlabel("Standard Deviation (Benchmark)\n(mm/day)", labelpad=20)
+        self.ax.set_xlabel("Standard Deviation (Reference)\n(mm/day)", labelpad=20)
 
         # add ticks to y-axis
         self.ax.yaxis.set_ticks_position('left')
