@@ -232,14 +232,14 @@ INSTRUMENT_PLOT_DICT = {
     },
     'sail_org':{
         'name': 'ORG',
-        'full_name': 'Optical Rain Gauge',
+        'full_name': 'Optical Rain\nGauge',
         'color': colors[6],
         'marker': '^',
         'size': 100
     },
     'sail_pwd':{
         'name': 'PWD',
-        'full_name': 'Present Weather Detector',
+        'full_name': 'Present Weather\nDetector',
         'color': colors[7],
         'marker': 'v',
         'size': 100
@@ -774,10 +774,11 @@ class TaylorDiagram:
 
         # Title for the circular axis
         self.ax.text(
-            np.deg2rad(45),       # halfway
-            self.ax.get_rmax() * 1.7,
+            np.deg2rad(45),
+            self.ax.get_rmax() * 1.5,
             "Correlation",
-            ha='center', va='center', fontsize=16,
+            rotation=-40,
+            ha='left', va='center', fontsize=16,
         )
 
 
@@ -835,10 +836,16 @@ class TaylorDiagram:
             # Plot circle
             self.ax.plot(theta_polar, r, color='dodgerblue', linestyle=ls, linewidth=lw,)
 
-            # Optional: label at theta = pi/4 along the circle
+            # Label at 45° azimuth along the circle
+            label_angle = np.pi / 4
+            x_label = self.ref_std + c * np.cos(label_angle)
+            y_label = c * np.sin(label_angle)
+            r_label = np.sqrt(x_label**2 + y_label**2)
+            theta_label = np.arctan2(y_label, x_label)
             self.ax.text(
-                0.1, np.sqrt((self.ref_std + c*np.cos(np.pi/8))**2 + (c*np.sin(np.pi/8))**2),
-                f"{c}", color='dodgerblue', ha='left', va='center', fontsize=12
+                theta_label, r_label,
+                f"{c}", color='dodgerblue', ha='center', va='center', fontsize=14,
+                bbox=dict(boxstyle='round,pad=0.2', facecolor='white', edgecolor='none', alpha=1)
             )
 
 
