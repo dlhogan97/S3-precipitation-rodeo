@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Table 1 – Instrument Specifications</title>
+<style>
+  @page { size: landscape; margin: 1cm; }
+
+  body {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 9pt;
+    margin: 1cm;
+    color: #000;
+  }
+
+  h2 {
+    font-size: 10pt;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .caption {
+    font-size: 8.5pt;
+    margin-bottom: 8px;
+    max-width: 100%;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  th, td {
+    border: 1px solid #555;
+    padding: 4px 6px;
+    vertical-align: top;
+    word-wrap: break-word;
+  }
+
+  th {
+    background-color: #d0d8e4;
+    font-weight: bold;
+    text-align: center;
+    font-size: 8.5pt;
+  }
+td.na {
+  text-align: center;
+  vertical-align: middle;
+}
+  td {
+    font-size: 9pt;
+  }
+
+  tr:nth-child(even) td {
+    background-color: #f4f6f9;
+  }
+
+  .ref {
+    color: #333;
+    font-style: normal;
+  }
+
+  .note {
+    font-style: italic;
+    font-size: 8.5pt;
+    color: #444;
+  }
+
+  .section-header td {
+    background-color: #b0bfcf;
+    font-weight: bold;
+    font-size: 8.5pt;
+    text-align: left;
+    padding: 4px 6px;
+  }
+
+  tfoot td {
+    border: none;
+    font-size: 8.5pt;
+    font-style: italic;
+    padding-top: 6px;
+  }
+
+  /* Column widths */
+  col.c1 { width: 12%; }
+  col.c2 { width: 9%; }
+  col.c3 { width: 10%; }
+  col.c4 { width: 7%; }
+  col.c5 { width: 9%; }
+  col.c6 { width: 7%; }
+  col.c7 { width: 8%; }
+  col.c8 { width: 6%; }
+  col.c9 { width: 32%; }
+</style>
+</head>
+<body>
+
+<h2>Table 1.</h2>
+<p class="caption">Instrument specifications including gauge type, make and model, location and field campaign, wind shield type (if applicable), deployment period, sampling interval, reported accuracy, spatial resolution (if applicable), and known measurement issues with relevant references. Asterisks (*) denote instruments requiring external power for heating or data logging.</p>
+
+<table>
+  <colgroup>
+    <col class="c1"><col class="c2"><col class="c3"><col class="c4">
+    <col class="c5"><col class="c6"><col class="c7"><col class="c8"><col class="c9">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Instrument</th>
+      <th>Make &amp; Model</th>
+      <th>Location(s) &amp; Campaign</th>
+      <th>Wind Shield</th>
+      <th>Deployment Period</th>
+      <th>Sampling Interval</th>
+      <th>Reported Accuracy</th>
+      <th>Spatial Resolution</th>
+      <th>Known Issues</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <!-- IN-SITU GAUGES -->
+    <tr class="section-header">
+      <td colspan="9">In-Situ Precipitation Gauges</td>
+    </tr>
+
+    <tr>
+      <td>Storage Gauge<em><br>[Reference]</em></td>
+      <td class="na">—</td>
+      <td>BB; Butte SNOTEL; Schofield Pass SNOTEL</td>
+      <td>Single-Alter</td>
+      <td>Ongoing</td>
+      <td>10 min</td>
+      <td class="na">—</td>
+      <td class="na">—</td>
+      <td>Snow capping over orifice; wind-driven undercatch <span class="ref">(Serreze et al., 1999; McGurk, 1986)</span></td>
+    </tr>
+
+    <tr>
+      <td>Weighing Bucket*</td>
+      <td>OTT Pluvio2</td>
+      <td>GT (SAIL); KP (SPLASH)</td>
+      <td>SDFIR (GT); LPDF (KP)</td>
+      <td>Sep 2021–Jun 2023</td>
+      <td>1 min; 30 min†</td>
+      <td>1%</td>
+      <td class="na">—</td>
+      <td>Wind-driven undercatch <span class="ref">(Rasmussen et al., 2012)</span>; wetting losses via evaporation or sublimation <span class="ref">(Groisman &amp; Legates, 1994; Savina et al., 2012)</span>; snow capping; burial of LPDF wind shield in deep snowpack <span class="ref">(Kochendorfer et al., 2023)</span>; power-dependent heating. <span class="note"></span></td>
+    </tr>
+
+    <tr>
+      <td>Tipping Bucket*</td>
+      <td>Novalynx 260-2500E-12</td>
+      <td>GT (SAIL)</td>
+      <td>SDFIR</td>
+      <td>Sep 2021–Jun 2023</td>
+      <td>1 min</td>
+      <td>3% liquid</td>
+      <td class="na">—</td>
+      <td>Filter clogging and riming during heavy snowfall cause severe undercatch <span class="ref">(Nitu &amp; Wong, 2010; Kochendorfer et al., 2022)</span>; wind-driven undercatch; snowmelt timing errors during mixed-phase events.</td>
+    </tr>
+
+    <tr>
+      <td>Optical Rain Gauge*</td>
+      <td>Optical Scientific ORG-815-DS</td>
+      <td>GT (SAIL)</td>
+      <td class="na">—</td>
+      <td>Sep 2021–Jun 2023</td>
+      <td>1 min</td>
+      <td>5% liquid; 10% solid</td>
+      <td class="na">—</td>
+      <td>Underperforms during solid precipitation and low precipitation rates <span class="ref">(Nystuen et al., 1996; Kyrouac &amp; Tuftedal, 2024)</span>; falsely registers blowing snow as precipitation <span class="ref">(Fassnacht, 2004; Cappozi et al., 2021)</span>; sensitive to particle size and shape <span class="ref">(Kochendorfer et al., 2022; Smith et al., 2020)</span>.</td>
+    </tr>
+
+    <tr>
+      <td>Present Weather Detector*</td>
+      <td>Vaisala PWD22</td>
+      <td>GT (SAIL)</td>
+      <td class="na">—</td>
+      <td>Sep 2021–Jun 2023</td>
+      <td>1 min</td>
+      <td>Not applicable</td>
+      <td class="na">—</td>
+      <td>Reduced accuracy during frozen precipitation; classification errors during mixed-phase events; susceptible to blowing snow contamination <span class="ref">(Kyrouac &amp; Tuftedal, 2024)</span>.</td>
+    </tr>
+
+    <tr>
+      <td>Laser Disdrometer*</td>
+      <td>OTT Parsivel2</td>
+      <td>GT (SAIL); KP (SPLASH)</td>
+      <td class="na">—</td>
+      <td>Sep 2021–Jun 2023 (GT); Sep 2023– (KP)</td>
+      <td>1 min</td>
+      <td>5% liquid; 20% solid</td>
+      <td class="na">—</td>
+      <td>Assumes liquid water density; overestimates snowfall without &#961;–D correction <span class="ref">(Boudala et al., 2014)</span>; blowing snow particles falsely registered as precipitation; &#961;–D adjustment uncertainty from snow crystal habit variability <span class="ref">(Heymsfield et al., 2004; Brandes et al., 2007; Holroyd, 1971)</span>; wind speed reduces apparent fall velocity, affecting precipitation rate estimates.</td>
+    </tr>
+
+    <tr>
+      <td>Snow Pillow</td>
+      <td>Alpine Hydromet FSP5 Fluidless</td>
+      <td>KP (SOS)</td>
+      <td class="na">—</td>
+      <td>Oct 2022–Jun 2023</td>
+      <td>5 min</td>
+      <td>0.3% (SWE only)</td>
+      <td class="na">—</td>
+      <td>Measures SWE only; not designed for event-scale precipitation timing <span class="ref">(2015)</span>; wind redistribution of snow complicates accumulation signal <span class="ref">(Lundquist et al., 2024)</span>; valid only when fully snow-covered.</td>
+    </tr>
+
+    <!-- GRIDDED PRODUCTS -->
+    <tr class="section-header">
+      <td colspan="9">Gridded Precipitation Products</td>
+    </tr>
+
+    <tr>
+      <td>SQUIRE</td>
+      <td>CSU X-Band Radar (SAIL)</td>
+      <td>Gridcell at GT &amp; KP (SAIL)</td>
+      <td class="na">—</td>
+      <td>Dec 2021–Mar 2022; Dec 2022–Mar 2023</td>
+      <td>5 min</td>
+      <td class="na">—</td>
+      <td>250 m</td>
+      <td>Z–S relationship uncertainty varies with snow crystal habit and storm type <span class="ref">(Matrosov et al., 2009; Jackson et al., 2026)</span>; winter months only; underperforms at high precipitation rates; ensemble spread reflects Z–S uncertainty.</td>
+    </tr>
+
+    <tr>
+      <td>PRISM</td>
+      <td class="na">—</td>
+      <td>Gridcell at GT &amp; KP</td>
+      <td class="na">—</td>
+      <td>Oct 2021–Sep 2023</td>
+      <td>1 day</td>
+      <td class="na">—</td>
+      <td>800 m</td>
+      <td>Reference gauge incorporated in PRISM algorithm, inflating apparent agreement <span class="ref">(Daly et al., 2008, 2021)</span>; sparse station network in complex terrain limits performance for small events <span class="ref">(Henn et al., 2018)</span>.</td>
+    </tr>
+
+    <tr>
+      <td>ERA5-Land</td>
+      <td>ECMWF</td>
+      <td>Gridcell at GT &amp; KP</td>
+      <td class="na">—</td>
+      <td>Oct 2021–Sep 2023</td>
+      <td>1 hr</td>
+      <td class="na">—</td>
+      <td>~9 km</td>
+      <td>Coarse resolution cannot resolve valley-scale precipitation variability; parameterized convection struggles with localized warm-season convection in complex terrain <span class="ref">(Beck et al., 2019)</span>.</td>
+    </tr>
+
+    <tr>
+      <td>ASO SWE</td>
+      <td>Airborne Snow Observatories</td>
+      <td>3×3 km area (BB, GT, KP)</td>
+      <td class="na">—</td>
+      <td>1 Apr 2023</td>
+      <td>Instantaneous</td>
+      <td class="na">—</td>
+      <td>50 m</td>
+      <td>Single flight limits temporal coverage; snow density derived from modeled values rather than direct measurement <span class="ref">(Painter et al., 2016)</span>; used here as estimate of accumulated winter precipitation only.</td>
+    </tr>
+
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="9">* Instrument requires external power for heating elements or data logging. † At GT, the "not-real-time" 30-min variable was used for the weighing bucket per manufacturer recommendation, as it undergoes additional proprietary processing to improve accuracy (Bartholomew, 2020). BB = billy barr site; GT = Gothic Town site; KP = Kettle Ponds site; SDFIR = Small Double Fence Intercomparison Reference; LPDF = Low-Porosity Double Fence; SWE = snow water equivalent; Z–S = radar reflectivity–snowfall rate relationship; &#961;–D = snow density–diameter relationship.</td>
+    </tr>
+  </tfoot>
+</table>
+
+</body>
+</html>
