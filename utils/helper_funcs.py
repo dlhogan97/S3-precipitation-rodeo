@@ -148,56 +148,56 @@ INSTRUMENT_PLOT_DICT = {
     },
     'sail_ld_unadjusted':{
         'name': 'LD-unadjusted',
-        'full_name': 'LD-unadjusted',
+        'full_name': 'Laser Disdrometer\nunadjusted',
         'color': colors[2],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_brandes':{
         'name': 'LD-Brandes',
-        'full_name': 'LD-Brandes',   
+        'full_name': 'Laser Disdrometer\nBrandes',   
         'color': colors[0],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_holyroyd':{
         'name': 'LD-Holyroyd',
-        'full_name': 'LD-Holyroyd',
+        'full_name': 'Laser Disdrometer\nHolyroyd',
         'color': colors[4],
         'marker': 'D',
         'size': 100
     },
     'sail_ld_heymsfield':{
         'name': 'LD-Heymsfield',
-        'full_name': 'LD-Heymsfield',
+        'full_name': 'Laser Disdrometer\nHeymsfield',
         'color': colors[5],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_unadjusted':{
         'name': 'LD-unadjusted',
-        'full_name': 'LD-unadjusted',
+        'full_name': 'Laser Disdrometer\nunadjusted',
         'color': colors[2],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_brandes':{
         'name': 'LD-Brandes',
-        'full_name': 'LD-Brandes',
+        'full_name': 'Laser Disdrometer\nBrandes',
         'color': colors[0],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_holyroyd':{
         'name': 'LD-Holyroyd',
-        'full_name': 'LD-Holyroyd',
+        'full_name': 'Laser Disdrometer\nHolyroyd',
         'color': colors[4],
         'marker': 'D',
         'size': 100
     },
     'splash_ld_heymsfield':{
         'name': 'LD-Heymsfield',
-        'full_name': 'LD-Heymsfield',
+        'full_name': 'Laser Disdrometer\nHeymsfield',
         'color': colors[5],
         'marker': 'D',
         'size': 100
